@@ -3841,6 +3841,9 @@ var qrcode = function() {
   +"#eb-prof .av.hasimg,.eb-prof-head .big.hasimg{background:none;}"
   +"#eb-prof .av img,.eb-prof-head .big img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}"
   +".eb-adm-count{max-width:560px;margin:0 auto 10px;color:#9fecc6;font:700 13px/1.3 Sora,Inter,sans-serif;text-align:center;background:#11201a;border:1px solid #1f5a3f;border-radius:12px;padding:10px;}"
+  +".eb-adm-stats{max-width:560px;margin:0 auto 14px;color:#8fa1ac;font:400 12px/1.5 Inter,sans-serif;}"
+  +".eb-adm-stats b{color:#eaf4f0;font-weight:700;}"
+  +".eb-adm-stats .num{color:#25E27C;font-weight:800;}"
   +".eb-photo-wrap{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}"
   +".eb-alu .sugcat{display:inline-block;background:#15242a;color:#9fd;border:1px solid #244;border-radius:20px;padding:4px 10px;font:700 11px/1 Inter,sans-serif;margin-bottom:8px;}"
   +".eb-alu .sugtx{color:#dfe9e6;font:400 13.5px/1.5 Inter,sans-serif;white-space:pre-wrap;word-break:break-word;background:#0f1619;border:1px solid #223;border-radius:10px;padding:10px 12px;margin:6px 0;}"
@@ -3965,9 +3968,10 @@ var qrcode = function() {
       +"<div class='eb-sec-title'>Dados do usuário</div>"
       +"<div class='eb-row'><div class='k'>Nome</div><div class='v' id='eb-acc-nome'>-</div></div>"
       +"<div class='eb-row'><div class='k'>E-mail</div><div class='v' id='eb-acc-email'>-</div></div>"
-      +"<div class='eb-field' id='eb-acc-nome-edit' style='display:none;margin-top:12px'><label>Novo nome</label><input id='eb-acc-nome-in' type='text'></div>"
-      +"<div style='display:flex;gap:8px;margin-top:6px'><button class='eb-btn ghost' id='eb-acc-nome-btn' style='width:auto;padding:11px 16px'>Editar nome</button><button class='eb-btn' id='eb-acc-nome-save' style='display:none;width:auto;padding:11px 16px'>Salvar</button></div>"
-      +"<div id='eb-acc-nome-msg' class='eb-msg'></div>"
+    +"</div>"
+    +"<div class='eb-box'>"
+      +"<div class='eb-sec-title'>Meus dados</div>"
+      +"<div id='eb-acc-dados'></div>"
     +"</div>"
     +"<div class='eb-box'>"
       +"<div class='eb-sec-title'>Segurança</div>"
@@ -3986,6 +3990,7 @@ var qrcode = function() {
   // ADMIN OVERLAY
   +"<div id='eb-admin' class='eb-ov'><div style='padding:calc(env(safe-area-inset-top,0px) + 26px) 16px 60px;max-width:680px;margin:0 auto;width:100%;box-sizing:border-box'>"
     +"<div class='eb-top'><button class='eb-back' id='eb-adm-back'>&#8592; Voltar</button><h2>Administrador</h2></div>"
+    +"<div id='eb-adm-stats' class='eb-adm-stats'></div>"
     +"<div class='eb-box' id='eb-alu-box' style='max-width:560px;margin:0 auto 14px'>"+"<div class='eb-sec-title'>&#128101; Alunos"+"<span id='eb-alu-badge' class='eb-alu-badge' style='display:none'></span>"+"</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Aceite os novos alunos e veja quem j&aacute; est&aacute; ativo.</div>"+"<div id='eb-adm-count' class='eb-adm-count'></div>"+"<div class='eb-tabs'><button data-tab='pend' class='on'>Pendentes</button><button data-tab='aprov'>Aprovados</button></div>"+"<input id='eb-alu-search' placeholder='Buscar aluno por nome ou e-mail' autocomplete='off' style='width:100%;box-sizing:border-box;background:#0f1619;border:1px solid #2a363a;border-radius:10px;color:#eaf4f0;font:400 14px/1 Inter,sans-serif;padding:11px 12px;margin:0 0 12px'>"+"<div id='eb-adm-list'></div>"+"</div>"
     +"<div class='eb-box' style='max-width:560px;margin:0 auto 14px'>"
       +"<div class='eb-sec-title'>&#127968; Página inicial</div>"
@@ -3999,7 +4004,7 @@ var qrcode = function() {
       +"<button class='eb-btn' id='eb-cfg-save'>Salvar página inicial</button>"
       +"<div id='eb-cfg-msg' class='eb-msg'></div>"
     +"</div>"
-    +"<div class='eb-box' id='eb-rep-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>&#128202; Relat&oacute;rios</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 12px'>Baixe em PDF. Na janela de impress&atilde;o, escolha &quot;Salvar como PDF&quot;.</div>"+"<button class='eb-btn ghost' id='rep-ativos' style='margin-top:6px'>&#128101; Pessoas ativas</button>"+"<button class='eb-btn ghost' id='rep-uso' style='margin-top:8px'>&#128295; Ferramentas mais usadas</button><button class='eb-btn ghost' id='rep-ranking' style='margin-top:8px'>&#127942; Ranking de quem mais usa</button><button class='eb-btn ghost' id='rep-bancos' style='margin-top:8px'>&#127974; Pessoas por banco</button><button class='eb-btn ghost' id='rep-locais' style='margin-top:8px'>&#128205; Alunos por localidade</button><button class='eb-btn ghost' id='rep-cresc' style='margin-top:8px'>&#128200; Crescimento de alunos</button><button class='eb-btn ghost' id='rep-horarios' style='margin-top:8px'>&#9200; Horários e dias de maior uso</button>"+"<button class='eb-btn ghost' id='rep-pend' style='margin-top:8px'>&#9203; Cadastros pendentes</button>"+"<button class='eb-btn ghost' id='rep-sug' style='margin-top:8px'>&#128161; Sugest&otilde;es recebidas</button>"+"<button class='eb-btn ghost' id='rep-fav' style='margin-top:8px'>&#11088; Abordagens mais favoritadas</button>"+"<button class='eb-btn ghost' id='rep-vagas' style='margin-top:8px'>&#128188; Vagas (abertas e expiradas)</button>"+"<button class='eb-btn ghost' id='rep-erros' style='margin-top:8px'>&#128030; Erros e acessos</button>"+"<button class='eb-btn ghost' id='rep-pag' style='margin-top:8px;opacity:.5;cursor:default' disabled>&#128179; Entradas / Pagamentos &middot; Em breve</button>"+"<div id='rep-msg' class='eb-msg'></div>"+"</div>"+"<div class='eb-box' id='eb-fb-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>&#128172; Feedbacks (tela inicial)</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 12px'>Aparecem passando no topo da tela inicial. Mostra s&oacute; o nome e o coment&aacute;rio (sem telefone).</div>"+"<div class='eb-field'><label>Nome</label><input id='fb-nome' placeholder='Ex: Carolina Lima'></div>"+"<div class='eb-field'><label>Coment&aacute;rio</label><textarea id='fb-texto' rows='2' class='eb-cfg-ta' placeholder='O que a pessoa falou sobre a novidade...'></textarea></div>"+"<button class='eb-btn' id='fb-add'>Adicionar feedback</button>"+"<div id='fb-msg' class='eb-msg'></div>"+"<div id='eb-fb-list' style='margin-top:14px'></div>"+"</div>"+"<div class='eb-box' id='eb-mlh-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>&#128161; Sugest&otilde;es de melhoria</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Enviadas pelas pessoas no menu. Mude o status; ao marcar Conclu&iacute;do, a data fica registrada.</div>"+"<div id='eb-mlh-list'></div>"+"</div>"+"<div class='eb-box' id='eb-nu-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>➕ Incluir novo usuário</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 12px'>Cria o acesso e já aprova. Depois copie os dados e envie para a pessoa.</div>"+"<div class='eb-field'><label>E-mail</label><input id='nu-email' inputmode='email' autocapitalize='off' placeholder='pessoa@email.com'></div>"+"<div class='eb-field'><label>Nome <small style='color:#8fa1ac'>(opcional)</small></label><input id='nu-nome'></div>"+"<div class='eb-field'><label>Senha padrão</label><input id='nu-pass' value='Ensina@2026'></div>"+"<button class='eb-btn' id='nu-create'>Criar usuário e aprovar</button>"+"<div id='nu-msg' class='eb-msg'></div>"+"<textarea id='nu-out' class='eb-cfg-ta' readonly style='display:none;margin-top:10px;min-height:120px'></textarea>"+"<button class='eb-btn ghost' id='nu-copy' style='display:none;margin-top:8px'>📋 Copiar dados pra enviar</button>"+"<button class='eb-btn ghost' id='nu-img' style='display:none;margin-top:8px'>🖼️ Baixar imagem de acesso</button>"+"</div>"+"<div class='eb-box' id='eb-sug-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>💡 Sugestões de abordagem</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Abordagens sugeridas pelas pessoas. Aprove, edite ou exclua. Veja nas abas Aprovadas e Excluídas.</div>"+"<div id='eb-sug-list'></div>"+"</div>"+"<div class='eb-box' id='eb-rs-box' style='max-width:560px;margin:0 auto 14px;display:none'><div class='eb-sec-title'>\uD83D\uDD11 Redefinições de senha</div><div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Pedidos de nova senha (sem e-mail). Confira o CPF e o telefone e aprove.</div><div id='eb-rs-list'></div></div>"
+    +"<div class='eb-box' id='eb-rep-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>&#128202; Relat&oacute;rios</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 12px'>Baixe em PDF. Na janela de impress&atilde;o, escolha &quot;Salvar como PDF&quot;.</div>"+"<button class='eb-btn ghost' id='rep-ativos' style='margin-top:6px'>&#128101; Pessoas ativas</button>"+"<button class='eb-btn ghost' id='rep-uso' style='margin-top:8px'>&#128295; Ferramentas mais usadas</button><button class='eb-btn ghost' id='rep-ranking' style='margin-top:8px'>&#127942; Ranking de quem mais usa</button><button class='eb-btn ghost' id='rep-bancos' style='margin-top:8px'>&#127974; Pessoas por banco</button><button class='eb-btn ghost' id='rep-locais' style='margin-top:8px'>&#128205; Alunos por localidade</button><button class='eb-btn ghost' id='rep-cresc' style='margin-top:8px'>&#128200; Crescimento de alunos</button><button class='eb-btn ghost' id='rep-horarios' style='margin-top:8px'>&#9200; Horários e dias de maior uso</button>"+"<button class='eb-btn ghost' id='rep-pend' style='margin-top:8px'>&#9203; Cadastros pendentes</button>"+"<button class='eb-btn ghost' id='rep-sug' style='margin-top:8px'>&#128161; Sugest&otilde;es recebidas</button>"+"<button class='eb-btn ghost' id='rep-fav' style='margin-top:8px'>&#11088; Abordagens mais favoritadas</button>"+"<button class='eb-btn ghost' id='rep-vagas' style='margin-top:8px'>&#128188; Vagas (abertas e expiradas)</button>"+"<button class='eb-btn ghost' id='rep-erros' style='margin-top:8px'>&#128030; Erros e acessos</button>"+"<button class='eb-btn ghost' id='rep-pag' style='margin-top:8px;opacity:.5;cursor:default' disabled>&#128179; Entradas / Pagamentos &middot; Em breve</button>"+"<div id='rep-msg' class='eb-msg'></div>"+"</div>"+"<div class='eb-box' id='eb-fb-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>&#128172; Feedbacks (tela inicial)<span id='eb-fb-badge' class='eb-alu-badge' style='display:none'></span></div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 12px'>Aparecem passando no topo da tela inicial. Mostra s&oacute; o nome e o coment&aacute;rio (sem telefone).</div>"+"<div class='eb-field'><label>Nome</label><input id='fb-nome' placeholder='Ex: Carolina Lima'></div>"+"<div class='eb-field'><label>Coment&aacute;rio</label><textarea id='fb-texto' rows='2' class='eb-cfg-ta' placeholder='O que a pessoa falou sobre a novidade...'></textarea></div>"+"<button class='eb-btn' id='fb-add'>Adicionar feedback</button>"+"<div id='fb-msg' class='eb-msg'></div>"+"<div id='eb-fb-list' style='margin-top:14px'></div>"+"</div>"+"<div class='eb-box' id='eb-mlh-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>&#128161; Sugest&otilde;es de melhoria<span id='eb-mlh-badge' class='eb-alu-badge' style='display:none'></span></div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Enviadas pelas pessoas no menu. Mude o status; ao marcar Conclu&iacute;do, a data fica registrada.</div>"+"<div id='eb-mlh-list'></div>"+"</div>"+"<div class='eb-box' id='eb-nu-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>➕ Incluir novo usuário</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 12px'>Cria o acesso e já aprova. Depois copie os dados e envie para a pessoa.</div>"+"<div class='eb-field'><label>E-mail</label><input id='nu-email' inputmode='email' autocapitalize='off' placeholder='pessoa@email.com'></div>"+"<div class='eb-field'><label>Nome <small style='color:#8fa1ac'>(opcional)</small></label><input id='nu-nome'></div>"+"<div class='eb-field'><label>Senha padrão</label><input id='nu-pass' value='Ensina@2026'></div>"+"<button class='eb-btn' id='nu-create'>Criar usuário e aprovar</button>"+"<div id='nu-msg' class='eb-msg'></div>"+"<textarea id='nu-out' class='eb-cfg-ta' readonly style='display:none;margin-top:10px;min-height:120px'></textarea>"+"<button class='eb-btn ghost' id='nu-copy' style='display:none;margin-top:8px'>📋 Copiar dados pra enviar</button>"+"<button class='eb-btn ghost' id='nu-img' style='display:none;margin-top:8px'>🖼️ Baixar imagem de acesso</button>"+"</div>"+"<div class='eb-box' id='eb-sug-box' style='max-width:560px;margin:0 auto 14px;display:none'>"+"<div class='eb-sec-title'>💡 Sugestões de abordagem<span id='eb-sug-badge' class='eb-alu-badge' style='display:none'></span></div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Abordagens sugeridas pelas pessoas. Aprove, edite ou exclua. Veja nas abas Aprovadas e Excluídas.</div>"+"<div id='eb-sug-list'></div>"+"</div>"+"<div class='eb-box' id='eb-rs-box' style='max-width:560px;margin:0 auto 14px;display:none'><div class='eb-sec-title'>\uD83D\uDD11 Redefinições de senha<span id='eb-rs-badge' class='eb-alu-badge' style='display:none'></span></div><div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Pedidos de nova senha (sem e-mail). Confira o CPF e o telefone e aprove.</div><div id='eb-rs-list'></div></div>"
   +"</div></div>";
 
   function show(el,on){ if(el) el.classList.toggle('on',!!on); }
@@ -4075,7 +4080,7 @@ var qrcode = function() {
     sb.from('profiles').select('nome,status,criado_em,foto,role,cpf,nascimento,telefone,cep,endereco,numero,complemento,bairro,cidade,uf,trabalha_banco,banco').eq('id',user.id).single().then(function(r){
       if(r.error||!r.data){ showGate('reproved'); return; }
       PROFILE=r.data;
-      if(r.data.status==='aprovado'){ if(!r.data.cpf||!String(r.data.cpf).trim()){ showCompletar(r.data); } else { enterHub(); } try{ checkPendencias(); }catch(e){} }
+      if(r.data.status==='aprovado'){ if(!r.data.cpf||!String(r.data.cpf).trim()){ showCompletar(r.data); } else { var _falta=camposFaltando(r.data); if(_falta.length){ showPendencia(r.data,_falta); } else { enterHub(); } } try{ checkPendencias(); }catch(e){} }
       else if(r.data.status==='reprovado'){ showGate('reproved'); }
       else { showGate('pending'); }
     });
@@ -4089,7 +4094,7 @@ var qrcode = function() {
   }
 
   /* ---------- ADMIN ---------- */
-  function openAdmin(){ if(!CURRENT && !MODO_CONSTRUCAO){ qs('eb-menu').classList.remove('on'); showGate('login'); return; } qs('eb-menu').classList.remove('on'); qs('eb-admin').classList.add('on'); var rc=qs('eb-cfg-recado'); if(rc) rc.value=HOMECFG.recado||''; var au=qs('eb-cfg-autor'); if(au) au.value=HOMECFG.recado_autor||''; var su=qs('eb-cfg-suporte'); if(su) su.value=HOMECFG.suporte||''; updateBannerBtns(); var _isadm=isAdm(); var _rb=qs('eb-rep-box'); if(_rb)_rb.style.display=_isadm?'block':'none'; var _fb=qs('eb-fb-box'); if(_fb)_fb.style.display=_isadm?'block':'none'; if(_isadm){try{loadFeedbacksAdmin();}catch(e){}} var _mb=qs('eb-mlh-box'); if(_mb)_mb.style.display=_isadm?'block':'none'; if(_isadm){try{loadMelhoriasAdmin();}catch(e){}} var _nu=qs('eb-nu-box'); if(_nu)_nu.style.display=_isadm?'block':'none'; var _sg=qs('eb-sug-box'); if(_sg)_sg.style.display=_isadm?'block':'none'; if(_isadm){try{loadSugestoes();}catch(e){}} var _rs=qs('eb-rs-box'); if(_rs)_rs.style.display=_isadm?'block':'none'; if(_isadm){try{loadRedefs();}catch(e){}} var _as=qs('eb-alu-search'); if(_as){_as.value=''; _as.oninput=renderAlunosFiltered;} ebCollapseInit(); clearMsg('eb-cfg-msg'); loadAdmin(); }
+  function openAdmin(){ if(!CURRENT && !MODO_CONSTRUCAO){ qs('eb-menu').classList.remove('on'); showGate('login'); return; } qs('eb-menu').classList.remove('on'); qs('eb-admin').classList.add('on'); var rc=qs('eb-cfg-recado'); if(rc) rc.value=HOMECFG.recado||''; var au=qs('eb-cfg-autor'); if(au) au.value=HOMECFG.recado_autor||''; var su=qs('eb-cfg-suporte'); if(su) su.value=HOMECFG.suporte||''; updateBannerBtns(); var _isadm=isAdm(); var _rb=qs('eb-rep-box'); if(_rb)_rb.style.display=_isadm?'block':'none'; var _fb=qs('eb-fb-box'); if(_fb)_fb.style.display=_isadm?'block':'none'; if(_isadm){try{loadFeedbacksAdmin();}catch(e){}} var _mb=qs('eb-mlh-box'); if(_mb)_mb.style.display=_isadm?'block':'none'; if(_isadm){try{loadMelhoriasAdmin();}catch(e){}} var _nu=qs('eb-nu-box'); if(_nu)_nu.style.display=_isadm?'block':'none'; var _sg=qs('eb-sug-box'); if(_sg)_sg.style.display=_isadm?'block':'none'; if(_isadm){try{loadSugestoes();}catch(e){}} var _rs=qs('eb-rs-box'); if(_rs)_rs.style.display=_isadm?'block':'none'; if(_isadm){try{loadRedefs();}catch(e){}} var _as=qs('eb-alu-search'); if(_as){_as.value=''; _as.oninput=renderAlunosFiltered;} ebCollapseInit(); clearMsg('eb-cfg-msg'); try{ loadAcessos(); }catch(e){} loadAdmin(); }
   function loadAdmin(){
     updateCount();
     var box=qs('eb-adm-list');
@@ -4123,6 +4128,31 @@ var qrcode = function() {
       if(box){ if(pend>0)box.classList.add('has-pend'); else box.classList.remove('has-pend'); }
       if(bd){ if(pend>0){ bd.textContent='⚠️ '+pend+(pend===1?' para aceitar':' para aceitar'); bd.style.display='inline-flex'; } else { bd.style.display='none'; } }
     }).catch(function(){});
+    try{ updateAdminBadges(); }catch(e){}
+  }
+  function loadAcessos(){
+    var el=document.getElementById('eb-adm-stats'); if(!el) return;
+    try{ if(!(sb&&CURRENT&&isAdm())){ el.innerHTML=''; return; } }catch(e){ el.innerHTML=''; return; }
+    var hoje=new Date(); hoje.setHours(0,0,0,0); var hojeISO=hoje.toISOString();
+    var notAdm='('+ADMIN_EMAILS.map(function(e){return '"'+e+'"';}).join(',')+')';
+    function cnt(todayOnly){ var q=sb.from('logs').select('id',{count:'exact',head:true}).eq('evento','login'); try{ q=q.not('email','in',notAdm); }catch(e){} if(todayOnly) q=q.gte('criado_em',hojeISO); return q; }
+    var nome=(PROFILE&&PROFILE.nome)?(' '+String(PROFILE.nome).split(' ')[0]):'';
+    cnt(true).then(function(r){
+      var h=(typeof r.count==='number')?r.count:0;
+      cnt(false).then(function(r2){
+        var t=(typeof r2.count==='number')?r2.count:0;
+        el.innerHTML="Olá, administrador"+esc(nome)+"! Hoje tivemos <span class='num'>"+h+"</span> acesso"+(h===1?'':'s')+".<br>Acesso acumulado: <b>"+t+"</b> no total.";
+      }, function(){ el.innerHTML="Olá, administrador"+esc(nome)+"! Hoje tivemos <span class='num'>"+h+"</span> acesso"+(h===1?'':'s')+"."; });
+    }, function(){ el.innerHTML=''; });
+  }
+  function _setSecBadge(id,n){ var b=document.getElementById(id); if(!b)return; if(n>0){ b.textContent='⚠️ '+n; b.style.display='inline-flex'; } else { b.style.display='none'; } }
+  function updateAdminBadges(){
+    try{ if(!(sb&&CURRENT&&isAdm())) return; }catch(e){ return; }
+    function cnt(tbl,id){ sb.from(tbl).select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r){ _setSecBadge(id,(typeof r.count==='number')?r.count:0); }, function(){ _setSecBadge(id,0); }); }
+    cnt('feedbacks','eb-fb-badge');
+    cnt('melhorias','eb-mlh-badge');
+    cnt('sugestoes','eb-sug-badge');
+    cnt('redefinicoes','eb-rs-badge');
   }
   function paintSug(list){
     var box=qs('eb-adm-list'); box.innerHTML='';
@@ -4623,6 +4653,7 @@ var qrcode = function() {
     qs('eb-acc-ms').textContent=ms;
     clearMsg('eb-acc-nome-msg'); clearMsg('eb-acc-pass-msg');
     try{ montarCarteirinha(); }catch(e){}
+    try{ _contaEdit=false; montarDadosConta(); }catch(e){}
     qs('eb-account').classList.add('on');
   }
   function _cartMono(){ return "<svg viewBox='0 0 100 100'><defs><linearGradient id='cmg' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#17CFE4'/><stop offset='.5' stop-color='#2BD9B0'/><stop offset='1' stop-color='#45F381'/></linearGradient></defs><circle cx='50' cy='50' r='48' fill='url(#cmg)'/><circle cx='50' cy='50' r='19' fill='#0e1316'/></svg>"; }
@@ -4944,7 +4975,7 @@ var qrcode = function() {
         }, function(){ b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui enviar agora.'); });
       }
       sb.rpc('conta_existe',{p_email:email,p_cpf:cpf.replace(/\D/g,'')}).then(function(rc){
-        if(rc && !rc.error && rc.data==='nao'){ b.disabled=false; try{ showGate('signup'); var se=qs('eb-s-email'); if(se)se.value=email; var sc=qs('eb-s-cpf'); if(sc)sc.value=cpf; }catch(e){} setMsg('eb-signup-msg','err','Esse e-mail não está cadastrado. Crie a sua conta aqui para acessar. 💚'); return; }
+        if(rc && !rc.error && rc.data==='nao'){ b.disabled=false; setMsg('eb-forgot-msg','err','Você ainda não tem acesso. Crie a sua conta primeiro para poder entrar. Te levei para o "Criar conta". 💚'); setTimeout(function(){ try{ showGate('signup'); var se=qs('eb-s-email'); if(se)se.value=email; var sc=qs('eb-s-cpf'); if(sc)sc.value=cpf; setMsg('eb-signup-msg','err','Você ainda não tem acesso. Crie a sua conta aqui para começar. 💚'); }catch(e){} }, 1400); return; }
         enviarRedef();
       }, function(){ enviarRedef(); });
     };
@@ -5005,14 +5036,6 @@ var qrcode = function() {
     var _repW={'rep-ativos':relAtivos,'rep-uso':relUso,'rep-ranking':relRanking,'rep-bancos':relBancos,'rep-locais':relLocais,'rep-cresc':relCrescimento,'rep-horarios':relHorarios,'rep-pend':relPend,'rep-sug':relSug,'rep-fav':relFav,'rep-vagas':relVagas,'rep-erros':relErros}; Object.keys(_repW).forEach(function(id){ var b=qs(id); if(b) b.onclick=_repW[id]; }); var _fbb=qs('fb-add'); if(_fbb)_fbb.onclick=addFeedback; var _nuc=qs('nu-create'); if(_nuc)_nuc.onclick=criarUsuario; var _nucp=qs('nu-copy'); if(_nucp)_nucp.onclick=copiarNovoUsuario; var _nui=qs('nu-img'); if(_nui)_nui.onclick=gerarImagemAcesso;
     // account
     qs('eb-acc-back').onclick=function(){ qs('eb-account').classList.remove('on'); };
-    qs('eb-acc-nome-btn').onclick=function(){ qs('eb-acc-nome-edit').style.display='block'; qs('eb-acc-nome-in').value=qs('eb-acc-nome').textContent; qs('eb-acc-nome-save').style.display='inline-block'; this.style.display='none'; };
-    qs('eb-acc-nome-save').onclick=function(){
-      var nv=qs('eb-acc-nome-in').value.trim(); if(!nv){ setMsg('eb-acc-nome-msg','err','Digite um nome.'); return; }
-      var b=this; b.disabled=true;
-      var p1=sb.auth.updateUser({data:{nome:nv}});
-      var p2= (CURRENT&&!isAdminEmail(CURRENT.email))? sb.from('profiles').update({nome:nv}).eq('id',CURRENT.id) : Promise.resolve({});
-      Promise.all([p1,p2]).then(function(){ b.disabled=false; if(PROFILE) PROFILE.nome=nv; qs('eb-acc-nm').textContent=nv; qs('eb-acc-nome').textContent=nv; qs('eb-menu-n').textContent=nv; qs('eb-av').textContent=nv.charAt(0).toUpperCase(); qs('eb-acc-av').textContent=nv.charAt(0).toUpperCase(); qs('eb-acc-nome-edit').style.display='none'; b.style.display='none'; qs('eb-acc-nome-btn').style.display='inline-block'; setMsg('eb-acc-nome-msg','ok','Nome atualizado!'); }).catch(function(e){ b.disabled=false; setMsg('eb-acc-nome-msg','err',traduz(e&&e.message)); });
-    };
     qs('eb-acc-pass-btn').onclick=function(){ qs('eb-acc-pass-edit').style.display='block'; qs('eb-acc-pass-save').style.display='inline-block'; this.style.display='none'; };
     qs('eb-acc-pass-save').onclick=function(){
       var np=qs('eb-acc-pass-in').value; clearMsg('eb-acc-pass-msg');
@@ -5142,7 +5165,113 @@ var qrcode = function() {
     function afterCpf(){ if(npass){ sb.auth.updateUser({password:npass}).then(function(){ finish(); },function(){ finish(); }); } else { finish(); } }
     sb.rpc('cpf_existe',{p_cpf:cpf.replace(/\D/g,'')}).then(function(rc){ if(rc && !rc.error && rc.data===true){ if(b)b.disabled=false; setMsg('eb-c-msg','err','Este CPF já está cadastrado em outra conta.'); return; } afterCpf(); }).catch(function(){ afterCpf(); });
   }
-  function openMelhoria(){
+  /* ===== Meus dados (editáveis, menos nome/CPF/nascimento) ===== */
+  var _contaEdit=false;
+  function montarDadosConta(){
+    var el=document.getElementById('eb-acc-dados'); if(!el) return;
+    var p=PROFILE||{};
+    var nasc=p.nascimento?String(p.nascimento).split('-').reverse().join('/'):'-';
+    function row(lb,v){ return "<div class='eb-row'><div class='k'>"+lb+"</div><div class='v'>"+esc(v||'-')+"</div></div>"; }
+    if(!_contaEdit){
+      var trabTxt=(p.trabalha_banco==='sim')?'Sim':(p.trabalha_banco==='nao'?'Não':'-');
+      el.innerHTML=row('CPF',p.cpf)+row('Nascimento',nasc)
+        +row('Telefone',p.telefone)+row('CEP',p.cep)+row('Endereço',p.endereco)
+        +row('Número',p.numero)+row('Complemento',p.complemento)+row('Bairro',p.bairro)
+        +row('Cidade',p.cidade)+row('UF',p.uf)+row('Trabalha em banco',trabTxt)+((p.trabalha_banco==='sim')?row('Banco',p.banco):'')
+        +"<div style='color:#5f7682;font:400 11px/1.4 Inter,sans-serif;margin-top:8px'>Nome, CPF e nascimento não podem ser alterados.</div>"
+        +"<button class='eb-btn ghost' id='eb-acc-dados-edit' style='margin-top:12px;width:auto;padding:11px 16px'>✏️ Editar meus dados</button>";
+      var eb=document.getElementById('eb-acc-dados-edit'); if(eb)eb.onclick=function(){ _contaEdit=true; montarDadosConta(); };
+    } else {
+      function fld(id,lb,val,extra){ return "<div class='eb-field'><label>"+lb+"</label><input id='"+id+"' value=\""+esc(val||'')+"\" "+(extra||'')+"></div>"; }
+      el.innerHTML=row('CPF',p.cpf)+row('Nascimento',nasc)
+        +fld('eb-ac-tel','Telefone',p.telefone,"inputmode='tel'")
+        +fld('eb-ac-cep','CEP',p.cep,"inputmode='numeric'")
+        +fld('eb-ac-end','Endereço',p.endereco,'')
+        +"<div style='display:flex;gap:10px'><div class='eb-field' style='flex:1'><label>Número</label><input id='eb-ac-num' value=\""+esc(p.numero||'')+"\" inputmode='numeric'></div><div class='eb-field' style='flex:1'><label>Complemento</label><input id='eb-ac-comp' value=\""+esc(p.complemento||'')+"\"></div></div>"
+        +fld('eb-ac-bairro','Bairro',p.bairro,'')
+        +"<div style='display:flex;gap:10px'><div class='eb-field' style='flex:2'><label>Cidade</label><input id='eb-ac-cidade' value=\""+esc(p.cidade||'')+"\"></div><div class='eb-field' style='flex:1'><label>UF</label><input id='eb-ac-uf' maxlength='2' style='text-transform:uppercase' value=\""+esc(p.uf||'')+"\"></div></div>"
+        +"<div class='eb-field'><label>Já trabalha em banco?</label><select id='eb-ac-trab' style='width:100%;background:#0f1619;border:1px solid #27333a;border-radius:10px;color:#eafff3;padding:11px 12px'><option value='nao'>Não</option><option value='sim'>Sim</option></select></div>"
+        +"<div class='eb-field' id='eb-ac-banco-wrap' style='display:none'><label>Qual banco?</label><input id='eb-ac-banco' value=\""+esc(p.banco||'')+"\" placeholder='Ex: Itaú...'></div>"
+        +"<div style='display:flex;gap:8px;margin-top:4px'><button class='eb-btn' id='eb-ac-save' style='width:auto;padding:11px 16px'>Salvar</button><button class='eb-btn ghost' id='eb-ac-cancel' style='width:auto;padding:11px 16px'>Cancelar</button></div>"
+        +"<div id='eb-ac-dados-msg' class='eb-msg'></div>";
+      var tel=document.getElementById('eb-ac-tel'); if(tel)tel.addEventListener('input',function(){this.value=maskTel(this.value);});
+      var cep=document.getElementById('eb-ac-cep'); if(cep)cep.addEventListener('input',function(){this.value=maskCEP(this.value); if(this.value.replace(/\D/g,'').length===8) buscaCEPInto('eb-ac-cep','eb-ac-end','eb-ac-bairro','eb-ac-cidade','eb-ac-uf');});
+      var tr=document.getElementById('eb-ac-trab'); if(tr){ tr.value=(p.trabalha_banco==='sim'?'sim':'nao'); var bw=document.getElementById('eb-ac-banco-wrap'); if(bw)bw.style.display=(tr.value==='sim')?'block':'none'; tr.addEventListener('change',function(){ var w=document.getElementById('eb-ac-banco-wrap'); if(w)w.style.display=(this.value==='sim')?'block':'none'; }); }
+      var cc=document.getElementById('eb-ac-cancel'); if(cc)cc.onclick=function(){ _contaEdit=false; montarDadosConta(); };
+      var sv=document.getElementById('eb-ac-save'); if(sv)sv.onclick=salvarDadosConta;
+    }
+  }
+  function salvarDadosConta(){
+    var g=function(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; };
+    var msg=document.getElementById('eb-ac-dados-msg'); function err(t){ if(msg){msg.className='eb-msg err';msg.style.display='block';msg.textContent=t;} }
+    var tel=g('eb-ac-tel'), cep=g('eb-ac-cep'), uf=g('eb-ac-uf').toUpperCase(), trab=((document.getElementById('eb-ac-trab')||{}).value)||'nao', banco=g('eb-ac-banco');
+    if(tel && tel.replace(/\D/g,'').length<10){ err('Telefone inválido.'); return; }
+    if(cep && cep.replace(/\D/g,'').length!==8){ err('CEP inválido.'); return; }
+    if(uf && uf.length!==2){ err('UF deve ter 2 letras.'); return; }
+    if(trab==='sim' && !banco){ err('Diga em qual banco você trabalha.'); return; }
+    var patch={telefone:tel,cep:cep,endereco:g('eb-ac-end'),numero:g('eb-ac-num'),complemento:g('eb-ac-comp'),bairro:g('eb-ac-bairro'),cidade:g('eb-ac-cidade'),uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:'')};
+    var b=document.getElementById('eb-ac-save'); if(b)b.disabled=true;
+    sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ err(traduz(r.error.message)); return; } try{ for(var k in patch) PROFILE[k]=patch[k]; }catch(e){} _contaEdit=false; montarDadosConta(); try{ montarCarteirinha(); }catch(e){} if(msg){msg.className='eb-msg ok';msg.style.display='block';msg.textContent='Dados atualizados! 💚';} }).catch(function(e){ if(b)b.disabled=false; err(traduz(e&&e.message)); });
+  }
+  /* ===== Trava: cadastro incompleto ===== */
+  var PCAMPOS={nascimento:{lb:'Data de nascimento',t:'data'},telefone:{lb:'Telefone',t:'tel'},cep:{lb:'CEP',t:'cep'},endereco:{lb:'Endereço',t:'text'},numero:{lb:'Número',t:'num'},bairro:{lb:'Bairro',t:'text'},cidade:{lb:'Cidade',t:'text'},uf:{lb:'UF',t:'uf'},trabalha_banco:{lb:'Já trabalha em banco?',t:'trab'},banco:{lb:'Qual banco?',t:'text'}};
+  var PREQ=['nascimento','telefone','cep','endereco','numero','bairro','cidade','uf','trabalha_banco'];
+  function _pfEmpty(v){ return v===null||v===undefined||String(v).trim()===''; }
+  function camposFaltando(p){ var f=[]; PREQ.forEach(function(k){ if(_pfEmpty(p[k])) f.push(k); }); if(String(p.trabalha_banco)==='sim' && _pfEmpty(p.banco)) f.push('banco'); return f; }
+  function showPendencia(prof, falta){
+    try{ qs('eb-gate').classList.remove('on'); }catch(e){}
+    var old=document.getElementById('eb-pendencia'); if(old){ try{old.parentNode.removeChild(old);}catch(e){} }
+    var hasTrab=falta.indexOf('trabalha_banco')>=0;
+    function inp(k){ var f=PCAMPOS[k]; if(!f) return '';
+      if(f.t==='trab'){ return "<div class='eb-field'><label>"+f.lb+"</label><select id='eb-pd-trabalha_banco' style='width:100%;background:#0f1619;border:1px solid #27333a;border-radius:10px;color:#eafff3;padding:11px 12px'><option value=''>Selecione</option><option value='nao'>Não</option><option value='sim'>Sim</option></select></div><div class='eb-field' id='eb-pd-banco-wrap' style='display:none'><label>Qual banco?</label><input id='eb-pd-banco' placeholder='Ex: Itaú...'></div>"; }
+      var ph='',ex='';
+      if(f.t==='data'){ ph='dd/mm/aaaa'; ex="inputmode='numeric' maxlength='10'"; }
+      else if(f.t==='tel'){ ph='(00) 00000-0000'; ex="inputmode='tel'"; }
+      else if(f.t==='cep'){ ph='00000-000'; ex="inputmode='numeric'"; }
+      else if(f.t==='uf'){ ex="maxlength='2' style='text-transform:uppercase'"; }
+      else if(f.t==='num'){ ex="inputmode='numeric'"; }
+      return "<div class='eb-field'><label>"+f.lb+"</label><input id='eb-pd-"+k+"' placeholder='"+ph+"' "+ex+"></div>";
+    }
+    var html=''; falta.forEach(function(k){ if(k==='banco'&&hasTrab) return; html+=inp(k); });
+    var ov=document.createElement('div'); ov.id='eb-pendencia'; ov.className='eb-ov on';
+    ov.innerHTML="<div class='eb-card' style='max-width:460px;max-height:92vh;overflow:auto'>"
+      +"<div class='eb-kick'>Central do Gerente</div><h1 class='eb-h' style='font-size:1.3rem'>Temos uma pendência no seu cadastro</h1>"
+      +"<p class='eb-sub'>Preencha os dados abaixo para prosseguir. É rapidinho. 💚</p>"
+      +html
+      +"<button class='eb-btn' id='eb-pd-save'>Salvar e continuar</button>"
+      +"<div id='eb-pd-msg' class='eb-msg'></div>"
+      +"<div class='eb-links' style='margin-top:10px'><a id='eb-pd-sair' style='cursor:pointer'>Sair</a></div>"
+      +"</div>";
+    document.body.appendChild(ov);
+    var w=function(id,fn){ var e=qs(id); if(e)e.addEventListener('input',fn); };
+    w('eb-pd-nascimento',function(){this.value=maskData(this.value);});
+    w('eb-pd-telefone',function(){this.value=maskTel(this.value);});
+    var cc=qs('eb-pd-cep'); if(cc)cc.addEventListener('input',function(){this.value=maskCEP(this.value); if(this.value.replace(/\D/g,'').length===8) buscaCEPInto('eb-pd-cep','eb-pd-endereco','eb-pd-bairro','eb-pd-cidade','eb-pd-uf');});
+    var tr=qs('eb-pd-trabalha_banco'); if(tr){ if(!_pfEmpty(prof.trabalha_banco))tr.value=prof.trabalha_banco; var bw0=qs('eb-pd-banco-wrap'); if(bw0)bw0.style.display=(tr.value==='sim')?'block':'none'; tr.addEventListener('change',function(){ var bw=qs('eb-pd-banco-wrap'); if(bw)bw.style.display=(this.value==='sim')?'block':'none'; }); }
+    var sv=qs('eb-pd-save'); if(sv)sv.onclick=function(){ salvarPendencia(falta); };
+    var sx=qs('eb-pd-sair'); if(sx)sx.onclick=function(){ try{sb.auth.signOut();}catch(e){} try{location.reload();}catch(e){} };
+  }
+  function salvarPendencia(falta){
+    clearMsg('eb-pd-msg');
+    var g=function(id){ var e=qs(id); return e?(e.value||'').trim():''; };
+    function need(k){ return falta.indexOf(k)>=0; }
+    var patch={}, err=null;
+    if(need('nascimento')){ var nasc=g('eb-pd-nascimento'); if(!dataISO(nasc)) err='Informe a data de nascimento (dd/mm/aaaa).'; else patch.nascimento=dataISO(nasc); }
+    if(!err&&need('telefone')){ var tel=g('eb-pd-telefone'); if(tel.replace(/\D/g,'').length<10) err='Informe um telefone válido.'; else patch.telefone=tel; }
+    if(!err&&need('cep')){ var cep=g('eb-pd-cep'); if(cep.replace(/\D/g,'').length!==8) err='Informe um CEP válido.'; else patch.cep=cep; }
+    if(!err&&need('endereco')){ var e1=g('eb-pd-endereco'); if(!e1) err='Informe o endereço.'; else patch.endereco=e1; }
+    if(!err&&need('numero')){ var n1=g('eb-pd-numero'); if(!n1) err='Informe o número.'; else patch.numero=n1; }
+    if(!err&&need('bairro')){ var b1=g('eb-pd-bairro'); if(!b1) err='Informe o bairro.'; else patch.bairro=b1; }
+    if(!err&&need('cidade')){ var c1=g('eb-pd-cidade'); if(!c1) err='Informe a cidade.'; else patch.cidade=c1; }
+    if(!err&&need('uf')){ var u1=g('eb-pd-uf').toUpperCase(); if(u1.length!==2) err='Informe a UF (2 letras).'; else patch.uf=u1; }
+    var trabFinal=(qs('eb-pd-trabalha_banco')?qs('eb-pd-trabalha_banco').value:((PROFILE&&PROFILE.trabalha_banco)||''));
+    if(!err&&need('trabalha_banco')){ if(!trabFinal) err='Diga se você já trabalha em banco.'; else patch.trabalha_banco=trabFinal; }
+    if(!err){ var simFinal=trabFinal==='sim'; if(simFinal){ var bc=g('eb-pd-banco'); if(!bc) err='Diga em qual banco você trabalha.'; else patch.banco=bc; } }
+    if(err){ setMsg('eb-pd-msg','err',err); return; }
+    var b=qs('eb-pd-save'); if(b)b.disabled=true;
+    sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ setMsg('eb-pd-msg','err',traduz(r.error.message)); return; } try{ if(PROFILE){ for(var k in patch) PROFILE[k]=patch[k]; } }catch(e){} var f2=camposFaltando(PROFILE); if(f2.length){ showPendencia(PROFILE,f2); return; } var ov=qs('eb-pendencia'); if(ov)ov.classList.remove('on'); enterHub(); }).catch(function(e){ if(b)b.disabled=false; setMsg('eb-pd-msg','err',traduz(e&&e.message)); });
+  }
+    function openMelhoria(){
     var ov=qs('eb-melh');
     if(!ov){
       ov=document.createElement('div'); ov.id='eb-melh'; ov.className='eb-ov';
