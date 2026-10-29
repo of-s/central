@@ -4646,9 +4646,11 @@ var qrcode = function() {
     +".eb-cart-scope .flip{width:100%;max-width:340px;margin-top:2px;perspective:1600px}"
     +".eb-cart-scope .flip-inner{position:relative;width:100%;height:452px;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d;cursor:pointer}"
     +".eb-cart-scope .flip.open .flip-inner{transform:rotateY(180deg)}"
-    +".eb-cart-scope .face{position:absolute;inset:0;border-radius:24px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid #223845;box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04)}"
-    +".eb-cart-scope .front{background:radial-gradient(420px 160px at 50% -40px, rgba(43,217,176,.28), rgba(43,217,176,0) 70%),linear-gradient(180deg,#19232a,#101619)}"
-    +".eb-cart-scope .back{transform:rotateY(180deg);background:radial-gradient(420px 160px at 50% -40px, rgba(23,207,228,.22), rgba(23,207,228,0) 70%),linear-gradient(180deg,#171f26,#0f1417)}"
+    +".eb-cart-scope .face{position:absolute;inset:0;border-radius:24px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid #223845;box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04);transition:opacity 0s linear .33s}"
+    +".eb-cart-scope .front{background:radial-gradient(420px 160px at 50% -40px, rgba(43,217,176,.28), rgba(43,217,176,0) 70%),linear-gradient(180deg,#19232a,#101619);opacity:1}"
+    +".eb-cart-scope .back{transform:rotateY(180deg);background:radial-gradient(420px 160px at 50% -40px, rgba(23,207,228,.22), rgba(23,207,228,0) 70%),linear-gradient(180deg,#171f26,#0f1417);opacity:0}"
+    +".eb-cart-scope .flip.open .front{opacity:0}"
+    +".eb-cart-scope .flip.open .back{opacity:1}"
     +".eb-cart-scope .secpat{position:absolute;inset:0;pointer-events:none;opacity:.5;background:repeating-radial-gradient(circle at 15% 120%, rgba(37,226,124,.05) 0 1px, transparent 1px 9px),repeating-linear-gradient(60deg, rgba(23,207,228,.035) 0 1px, transparent 1px 8px)}"
     +".eb-cart-scope .wm{position:absolute;right:-26px;bottom:-30px;width:190px;height:190px;opacity:.06;pointer-events:none}"
     +".eb-cart-scope .sweep{position:absolute;top:-40px;left:-30%;width:160%;height:120px;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(69,243,129,.16) 50%,transparent 65%);transform:rotate(-8deg)}"
@@ -4758,42 +4760,70 @@ var qrcode = function() {
     var dl=document.getElementById('eb-acc-cart-dl'); if(dl) dl.onclick=baixarCarteirinha;
   }
   function introCarteirinha(){
-    try{ if(!CURRENT) return; if(isAdm()) return; }catch(e){ return; }
-    try{ var dk=localStorage.getItem('eb_cart_intro'); if(dk===(new Date()).toDateString()) return; }catch(e){}
+    try{ if(!CURRENT) return; }catch(e){ return; }
+    try{ if(sessionStorage.getItem('eb_cart_intro')==='1') return; }catch(e){}
     if(document.getElementById('eb-cart-intro')) return;
+    if(!document.getElementById('eb-cart-css')){ var cs=document.createElement('style'); cs.id='eb-cart-css'; cs.textContent=_cartCSS(); document.head.appendChild(cs); }
     if(!document.getElementById('eb-cart-intro-css')){
       var st=document.createElement('style'); st.id='eb-cart-intro-css';
       st.textContent=""
-        +"#eb-cart-intro{position:fixed;inset:0;z-index:99995;display:flex;align-items:center;justify-content:center;background:rgba(6,12,10,.72);opacity:0;transition:opacity .4s}"
+        +"#eb-cart-intro{position:fixed;inset:0;z-index:99995;display:flex;justify-content:center;align-items:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 84px);pointer-events:none;opacity:0;transition:opacity .4s}"
         +"#eb-cart-intro.show{opacity:1}"
-        +"#eb-cart-intro .mini{width:236px;border-radius:20px;background:radial-gradient(300px 120px at 50% -30px,rgba(43,217,176,.30),transparent 70%),linear-gradient(180deg,#19232a,#101619);border:1px solid #2bd9b0;box-shadow:0 30px 70px rgba(0,0,0,.6),0 0 0 1px rgba(43,217,176,.3);padding:22px 18px;text-align:center;transform:scale(.6);opacity:1;transition:transform .5s cubic-bezier(.2,.8,.2,1)}"
-        +"#eb-cart-intro.show .mini{transform:scale(1)}"
-        +"#eb-cart-intro.fly .mini{transition:transform .9s cubic-bezier(.5,0,.7,1),opacity .9s}"
-        +"#eb-cart-intro .mn{width:46px;height:46px;margin:0 auto 12px}#eb-cart-intro .mn svg{width:100%;height:100%;display:block}"
-        +"#eb-cart-intro .t1{font-family:Sora,sans-serif;font-weight:800;font-size:16px;color:#fff;margin-bottom:5px}"
-        +"#eb-cart-intro .pill{display:inline-flex;align-items:center;gap:5px;margin:4px 0 12px;background:#0f1b18;border:1px solid #1f5a3f;color:#a9f3cf;font:600 11.5px/1 Inter,sans-serif;padding:5px 11px;border-radius:999px}"
-        +"#eb-cart-intro .t2{color:#8fa1ac;font:500 12px/1.5 Inter,sans-serif}";
+        +"#eb-cart-intro .introcard{pointer-events:auto;cursor:pointer;transform:scale(.66);transform-origin:top center;transition:transform .5s cubic-bezier(.2,.8,.2,1)}"
+        +"#eb-cart-intro.show .introcard{transform:scale(.8)}"
+        +"#eb-cart-intro.fly .introcard{transition:transform .9s cubic-bezier(.5,0,.7,1),opacity .9s}"
+        +"#eb-cart-intro .intro-hint{position:absolute;left:0;right:0;bottom:12%;text-align:center;color:#bfeede;font:700 12.5px/1.4 Sora,Inter,sans-serif;text-shadow:0 2px 10px rgba(0,0,0,.6)}";
       document.head.appendChild(st);
     }
+    var mono=_cartMono();
+    var logoSrc=''; try{ var _hl=document.querySelector('.hub-logo'); if(_hl) logoSrc=_hl.getAttribute('src')||''; }catch(e){}
+    var nome=(PROFILE&&PROFILE.nome)||(CURRENT&&CURRENT.user_metadata&&CURRENT.user_metadata.nome)||'Aluno';
+    var L=(nome||'').length; var nmFs=(L>34?14:(L>26?15.5:(L>20?17:18.5)));
+    var banco=(PROFILE&&PROFILE.trabalha_banco==='sim'&&PROFILE.banco)?esc(PROFILE.banco):'-';
+    var city=(PROFILE&&PROFILE.cidade)?(esc(PROFILE.cidade)+(PROFILE.uf?'/'+esc(PROFILE.uf):'')):'-';
+    var since='-'; var dref=(PROFILE&&PROFILE.criado_em)||(CURRENT&&CURRENT.created_at); if(dref){ try{ var d=new Date(dref); since=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][d.getMonth()]+' / '+d.getFullYear(); }catch(e){} }
+    var photoInner=(PROFILE&&PROFILE.foto)?("<img src='"+PROFILE.foto+"' alt=''><span class='corner'></span>"):("<svg viewBox='0 0 24 24' fill='none'><circle cx='12' cy='8' r='4' fill='#5f7682'/><path d='M4 20c0-4 3.6-6 8-6s8 2 8 6' fill='#5f7682'/></svg><span class='corner'></span>");
+    var front="<div class='secpat'></div><div class='sweep'></div><span class='wm mono'>"+mono+"</span><div class='cinner'>"
+      +"<div class='c-top'>"+(logoSrc?("<img class='c-logo' src='"+logoSrc+"' alt='Ensina Banco'>"):"<span></span>")+"<div class='c-tag'><span class='mono'>"+mono+"</span> Central do Gerente</div></div>"
+      +"<div class='id-main'><div class='cphoto'>"+photoInner+"</div>"
+        +"<div class='id-name'><div class='nm' style='font-size:"+nmFs+"px'>"+esc(nome)+" <svg class='verif' viewBox='0 0 24 24' fill='none'><path d='M12 2l2.3 1.7 2.8-.3 1.2 2.6 2.6 1.2-.3 2.8L22 12l-1.7 2.3.3 2.8-2.6 1.2-1.2 2.6-2.8-.3L12 22l-2.3-1.7-2.8.3-1.2-2.6L3.1 16.6l.3-2.8L2 12l1.7-2.3-.3-2.8 2.6-1.2L7.2 3l2.8.3L12 2z' fill='#17a2f3'/><path d='M8.5 12.2l2.3 2.3 4.6-4.8' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg></div>"
+        +"<div class='bank'>🎓 Aluno Ensina Banco</div></div></div>"
+      +"<div class='divider'></div>"
+      +"<div class='grid'>"
+        +"<div class='cell'><div class='lb'>Matr&iacute;cula</div><div class='vl neon' id='introcart-mat'>#...</div></div>"
+        +"<div class='cell'><div class='lb'>Membro desde</div><div class='vl'>"+since+"</div></div>"
+        +"<div class='cell'><div class='lb'>Cidade</div><div class='vl'>"+city+"</div></div>"
+        +"<div class='cell'><div class='lb'>Banco</div><div class='vl'>"+banco+"</div></div>"
+      +"</div>"
+      +"<div class='c-foot'><div class='qr'><img id='introcart-qr' alt='Validar aluno'></div><div class='ft-tx'><div class='t1'>Aluno verificado</div><div class='t2'>Aponte a c&acirc;mera para validar o cadastro.</div><div class='stat'><span class='dot'></span> ATIVO</div></div></div>"
+    +"</div>";
+    var card="<div class='eb-cart-scope introcard'><div class='lanyard'>"
+      +"<div class='strap'><div class='strap-band'><span class='lg'>"+(logoSrc?("<img src='"+logoSrc+"' alt='Ensina'>"):"")+"</span></div></div>"
+      +"<div class='clip'><span class='mono'>"+mono+"</span></div>"
+      +"<div class='flip'><div class='flip-inner' style='height:auto'><div class='face front' style='position:relative'>"+front+"</div></div></div>"
+    +"</div></div>";
     var ov=document.createElement('div'); ov.id='eb-cart-intro';
-    ov.innerHTML="<div class='mini'><div class='mn'>"+_cartMono()+"</div><div class='t1'>Sua carteirinha de aluno</div><div class='pill'>🎓 Aluno Ensina Banco</div><div class='t2'>Fica na sua conta, aqui em cima 👆<br>Toque no seu perfil quando quiser.</div></div>";
+    ov.innerHTML=card+"<div class='intro-hint'>👆 Sua carteirinha fica no seu perfil</div>";
     document.body.appendChild(ov);
-    try{ localStorage.setItem('eb_cart_intro',(new Date()).toDateString()); }catch(e){}
+    try{ sessionStorage.setItem('eb_cart_intro','1'); }catch(e){}
+    try{ var vurl=location.origin+location.pathname+'?validar='+encodeURIComponent(CURRENT.id); var qr=qrcode(0,'M'); qr.addData(vurl); qr.make(); var qi=document.getElementById('introcart-qr'); if(qi) qi.src=qr.createDataURL(4,2); }catch(e){}
+    try{ if(sb&&PROFILE&&PROFILE.criado_em){ sb.from('profiles').select('id',{count:'exact',head:true}).eq('status','aprovado').lte('criado_em',PROFILE.criado_em).then(function(r){ var n=(typeof r.count==='number')?r.count:null; var el=document.getElementById('introcart-mat'); if(el) el.textContent=(n!=null)?('#'+n):'#-'; }, function(){ var el=document.getElementById('introcart-mat'); if(el) el.textContent='#-'; }); } else { var el0=document.getElementById('introcart-mat'); if(el0) el0.textContent='#-'; } }catch(e){}
     requestAnimationFrame(function(){ ov.classList.add('show'); });
     var done=false;
     function fly(){
       if(done) return; done=true;
-      var mini=ov.querySelector('.mini'); var av=document.getElementById('eb-av')||document.getElementById('eb-prof');
+      var cardEl=ov.querySelector('.introcard'); var hint=ov.querySelector('.intro-hint'); if(hint)hint.style.opacity='0';
+      var av=document.getElementById('eb-av')||document.getElementById('eb-prof');
       ov.classList.add('fly');
       try{
-        if(mini&&av){ var r=av.getBoundingClientRect(); var m=mini.getBoundingClientRect(); var dx=(r.left+r.width/2)-(m.left+m.width/2); var dy=(r.top+r.height/2)-(m.top+m.height/2); mini.style.transform='translate('+dx+'px,'+dy+'px) scale(.06)'; mini.style.opacity='0'; }
-        else if(mini){ mini.style.transform='translateY(-40vh) scale(.06)'; mini.style.opacity='0'; }
+        if(cardEl&&av){ var r=av.getBoundingClientRect(); var m=cardEl.getBoundingClientRect(); var dx=(r.left+r.width/2)-(m.left+m.width/2); var dy=(r.top+r.height/2)-(m.top+m.height/2); cardEl.style.transform='translate('+dx+'px,'+dy+'px) scale(.06)'; cardEl.style.opacity='0'; }
+        else if(cardEl){ cardEl.style.transform='translateY(-70vh) scale(.06)'; cardEl.style.opacity='0'; }
       }catch(e){}
       ov.style.opacity='0';
       setTimeout(function(){ try{ ov.remove(); }catch(e){} },1000);
     }
     ov.addEventListener('click',fly);
-    setTimeout(fly,4500);
+    setTimeout(fly,5000);
   }
   function baixarCarteirinha(){
     var msg=document.getElementById('eb-acc-cart-msg');
@@ -4801,11 +4831,25 @@ var qrcode = function() {
     if(typeof html2canvas!=='function'){ if(msg){ msg.className='eb-msg err'; msg.style.display='block'; msg.textContent='Não consegui gerar agora.'; } return; }
     if(msg){ msg.className='eb-msg'; msg.style.display='block'; msg.textContent='Gerando imagem...'; }
     var fl=document.getElementById('eb-cart-card'); var wasOpen=fl&&fl.classList.contains('open'); if(fl)fl.classList.remove('open');
-    html2canvas(node,{scale:2,backgroundColor:null,logging:false,useCORS:true}).then(function(cv){
-      try{ var a=document.createElement('a'); a.href=cv.toDataURL('image/png'); var nm=((PROFILE&&PROFILE.nome)||'carteirinha').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'carteirinha'; a.download='carteirinha-'+nm+'.png'; document.body.appendChild(a); a.click(); a.remove(); }catch(e){}
+    html2canvas(node,{scale:2,backgroundColor:'#0e1316',logging:false,useCORS:true}).then(function(cv){
       if(fl&&wasOpen)fl.classList.add('open');
-      if(msg){ msg.className='eb-msg ok'; msg.textContent='Pronto! Carteirinha baixada. 💚'; }
+      var url=cv.toDataURL('image/png');
+      var nm=((PROFILE&&PROFILE.nome)||'carteirinha').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'carteirinha';
+      try{ var a=document.createElement('a'); a.href=url; a.download='carteirinha-'+nm+'.png'; document.body.appendChild(a); a.click(); a.remove(); }catch(e){}
+      try{ mostrarImagemCarteirinha(url,nm); }catch(e){}
+      if(msg){ msg.className='eb-msg ok'; msg.textContent='Pronto! Se não baixar sozinho, segure na imagem e salve. 💚'; }
     }).catch(function(){ if(fl&&wasOpen)fl.classList.add('open'); if(msg){ msg.className='eb-msg err'; msg.textContent='Não consegui gerar agora. Tente de novo.'; } });
+  }
+  function mostrarImagemCarteirinha(url,nm){
+    var ov=document.createElement('div'); ov.id='eb-cart-img-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:99996;background:rgba(6,12,10,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;overflow:auto';
+    ov.innerHTML="<div style='color:#bfeede;font:700 13px/1.4 Sora,sans-serif;text-align:center;max-width:300px'>📲 No celular: segure na imagem e escolha \"Salvar em Fotos\".</div>"
+      +"<img src='"+url+"' alt='Carteirinha' style='max-width:300px;width:100%;height:auto;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.6)'>"
+      +"<a href='"+url+"' download='carteirinha-"+(nm||'aluno')+".png' style='color:#04120c;background:linear-gradient(135deg,#17CFE4,#2BD9B0,#45F381);text-decoration:none;font:800 13px Sora,sans-serif;padding:12px 20px;border-radius:12px'>⬇️ Baixar imagem</a>"
+      +"<button id='eb-cart-img-x' style='background:none;border:none;color:#8fa1ac;font:600 13px Inter,sans-serif;cursor:pointer;margin-top:2px'>Fechar</button>";
+    document.body.appendChild(ov);
+    var xb=document.getElementById('eb-cart-img-x'); if(xb) xb.onclick=function(){ try{ov.remove();}catch(e){} };
+    ov.addEventListener('click',function(e){ if(e.target===ov){ try{ov.remove();}catch(_){} } });
   }
   function mostrarValidacao(id){
     var logoSrc=''; try{ var _hl=document.querySelector('.hub-logo'); if(_hl) logoSrc=_hl.getAttribute('src')||''; }catch(e){}
