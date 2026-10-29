@@ -4238,16 +4238,17 @@ var qrcode = function() {
     ov.innerHTML="<div class='eb-card' style='max-width:430px'>"
       +"<div class='eb-kick'>Central do Gerente</div><h1 class='eb-h' style='font-size:1.3rem'>Confirme seu cadastro</h1>"
       +"<p class='eb-sub'>Só pra confirmar, bem rapidinho: você trabalha em algum banco?</p>"
-      +"<div style='display:flex;gap:10px;margin:4px 0 6px'><button class='eb-btn' id='eb-cb-sim' style='flex:1'>Sim, trabalho</button><button class='eb-btn ghost' id='eb-cb-nao' style='flex:1'>Não trabalho</button></div>"
+      +"<div style='display:flex;gap:10px;margin:4px 0 6px'><button class='eb-btn ghost' id='eb-cb-sim' style='flex:1'>Sim, trabalho</button><button class='eb-btn ghost' id='eb-cb-nao' style='flex:1'>Não trabalho</button></div>"
       +"<div class='eb-field' id='eb-cb-wrap' style='display:none;margin-top:10px'><label>Em qual banco você trabalha?</label><input id='eb-cb-banco' placeholder='Ex: Itaú, Bradesco, Caixa...'></div>"
       +"<button class='eb-btn' id='eb-cb-save' style='display:none;margin-top:6px'>Salvar e continuar</button>"
       +"<div id='eb-cb-msg' class='eb-msg'></div>"
       +"</div>";
     document.body.appendChild(ov);
+    var _sel=null;
     function fim(){ var o=document.getElementById('eb-confbanco'); if(o&&o.parentNode)o.parentNode.removeChild(o); enterHub(); }
-    qs('eb-cb-nao').onclick=function(){ var b=this; b.disabled=true; sb.from('profiles').update({banco_confirmado:true}).eq('id',CURRENT.id).then(function(){ if(PROFILE)PROFILE.banco_confirmado=true; fim(); }, function(){ fim(); }); };
-    qs('eb-cb-sim').onclick=function(){ qs('eb-cb-wrap').style.display='block'; qs('eb-cb-save').style.display='block'; this.disabled=true; var nb=qs('eb-cb-nao'); if(nb)nb.disabled=true; var inp=qs('eb-cb-banco'); if(inp)inp.focus(); };
-    qs('eb-cb-save').onclick=function(){ var banco=(qs('eb-cb-banco').value||'').trim(); if(!banco){ setMsg('eb-cb-msg','err','Diga em qual banco você trabalha.'); return; } var b=this; b.disabled=true; sb.from('profiles').update({trabalha_banco:'sim',banco:banco,banco_confirmado:true}).eq('id',CURRENT.id).then(function(r){ if(r&&r.error){ b.disabled=false; setMsg('eb-cb-msg','err',traduz(r.error.message)); return; } if(PROFILE){PROFILE.trabalha_banco='sim';PROFILE.banco=banco;PROFILE.banco_confirmado=true;} fim(); }, function(){ b.disabled=false; setMsg('eb-cb-msg','err','Não consegui salvar agora.'); }); };
+    qs('eb-cb-sim').onclick=function(){ _sel='sim'; this.classList.remove('ghost'); var nb=qs('eb-cb-nao'); if(nb)nb.classList.add('ghost'); qs('eb-cb-wrap').style.display='block'; qs('eb-cb-save').style.display='block'; setMsg('eb-cb-msg','',''); var inp=qs('eb-cb-banco'); if(inp)inp.focus(); };
+    qs('eb-cb-nao').onclick=function(){ _sel='nao'; this.classList.remove('ghost'); var sb2=qs('eb-cb-sim'); if(sb2)sb2.classList.add('ghost'); qs('eb-cb-wrap').style.display='none'; qs('eb-cb-save').style.display='block'; setMsg('eb-cb-msg','',''); };
+    qs('eb-cb-save').onclick=function(){ var b=this; if(_sel==='nao'){ b.disabled=true; sb.from('profiles').update({trabalha_banco:'nao',banco_confirmado:true}).eq('id',CURRENT.id).then(function(r){ if(r&&r.error){ b.disabled=false; setMsg('eb-cb-msg','err',traduz(r.error.message)); return; } if(PROFILE){PROFILE.trabalha_banco='nao';PROFILE.banco_confirmado=true;} fim(); }, function(){ b.disabled=false; setMsg('eb-cb-msg','err','Não consegui salvar agora.'); }); return; } var banco=(qs('eb-cb-banco').value||'').trim(); if(!banco){ setMsg('eb-cb-msg','err','Diga em qual banco você trabalha.'); return; } b.disabled=true; sb.from('profiles').update({trabalha_banco:'sim',banco:banco,banco_confirmado:true}).eq('id',CURRENT.id).then(function(r){ if(r&&r.error){ b.disabled=false; setMsg('eb-cb-msg','err',traduz(r.error.message)); return; } if(PROFILE){PROFILE.trabalha_banco='sim';PROFILE.banco=banco;PROFILE.banco_confirmado=true;} fim(); }, function(){ b.disabled=false; setMsg('eb-cb-msg','err','Não consegui salvar agora.'); }); };
   }
   function renderSenhaTemp(){
     try{ var old=document.getElementById('eb-stemp'); if(old&&old.parentNode)old.parentNode.removeChild(old); }catch(e){}
