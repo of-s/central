@@ -3903,7 +3903,7 @@ var qrcode = function() {
     +"<div style='display:flex;gap:10px'><div class='eb-field' style='flex:1'><label>Número</label><input id='eb-s-num' inputmode='numeric' placeholder='123'></div><div class='eb-field' style='flex:1.4'><label>Complemento</label><input id='eb-s-comp' placeholder='apto, bloco...'></div></div>"
     +"<div class='eb-field'><label>Bairro</label><input id='eb-s-bairro'></div>"
     +"<div style='display:flex;gap:10px'><div class='eb-field' style='flex:2'><label>Cidade</label><input id='eb-s-cidade'></div><div class='eb-field' style='flex:1'><label>UF</label><input id='eb-s-uf' maxlength='2' style='text-transform:uppercase'></div></div>"
-    +"<div class='eb-field'><label>Já trabalha em banco?</label><select id='eb-s-trab' style='width:100%;background:#0f1619;border:1px solid #27333a;border-radius:10px;color:#eafff3;padding:11px 12px;font:500 14px/1.3 Inter,sans-serif;appearance:none'><option value='nao'>Não</option><option value='sim'>Sim</option></select></div>"
+    +"<div class='eb-field'><label>Já trabalha em banco?</label><select id='eb-s-trab' style='width:100%;background:#0f1619;border:1px solid #27333a;border-radius:10px;color:#eafff3;padding:11px 12px;font:500 14px/1.3 Inter,sans-serif;appearance:none'><option value='sim'>Sim</option><option value='nao'>Não</option></select></div>"
     +"<div class='eb-field' id='eb-s-banco-wrap' style='display:none'><label>Qual banco?</label><input id='eb-s-banco' placeholder='Ex: Itaú, Bradesco, Caixa...'></div>"
     +"<div class='eb-field'><label>Senha</label><input id='eb-s-pass' type='password' autocomplete='new-password' placeholder='mínimo 6 caracteres'></div>"
     +"<div class='eb-field'><label>Repita a senha</label><input id='eb-s-pass2' type='password' autocomplete='new-password' placeholder='repita a senha'></div>"
@@ -3914,13 +3914,12 @@ var qrcode = function() {
   // FORGOT
   +"<div class='eb-screen' data-s='forgot' style='display:none'>"
     +"<div class='eb-kick'>Central do Gerente</div><h1 class='eb-h'>REDEFINIR SENHA</h1>"
-    +"<p class='eb-sub'>Sem e-mail: confirme seus dados e escolha a nova senha. O Ensina Banco aprova e libera o acesso.</p>"
+    +"<p class='eb-sub'>Confirme o seu e-mail e CPF e escolha uma nova senha. O seu acesso é liberado na hora, e o suporte confirma em até 24h.</p>"
     +"<div class='eb-field'><label>E-mail</label><input id='eb-f-email' type='email' autocomplete='email' placeholder='voce@email.com'></div>"
     +"<div class='eb-field'><label>CPF</label><input id='eb-f-cpf' inputmode='numeric' placeholder='000.000.000-00'></div>"
-    +"<div class='eb-field'><label>Telefone</label><input id='eb-f-tel' inputmode='tel' placeholder='(00) 00000-0000'></div>"
     +"<div class='eb-field'><label>Nova senha (mínimo 6)</label><input id='eb-f-pass' type='password' autocomplete='new-password' placeholder='nova senha'></div>"
     +"<div class='eb-field'><label>Confirme a nova senha</label><input id='eb-f-pass2' type='password' autocomplete='new-password' placeholder='repita a senha'></div>"
-    +"<button class='eb-btn' id='eb-btn-forgot'>Enviar pedido</button>"
+    +"<button class='eb-btn' id='eb-btn-forgot'>Liberar meu acesso</button>"
     +"<div id='eb-forgot-msg' class='eb-msg'></div>"
     +"<div class='eb-links'><a data-go='login'>Voltar</a></div>"
   +"</div>"
@@ -4069,6 +4068,7 @@ var qrcode = function() {
     try{ if(window.restorePerfilFields) setTimeout(window.restorePerfilFields, 250); }catch(e){}
     try{ setTimeout(notifPendentes, 800); }catch(e){}
     try{ loadHomeCfg(); }catch(e){}
+    try{ renderSenhaTemp(); }catch(e){}
     try{ setTimeout(checkVagasCidade, 1100); }catch(e){}
     try{ setTimeout(introCarteirinha, 1000); }catch(e){}
     try{ window.dispatchEvent(new CustomEvent('eb-auth-ready')); }catch(e){}
@@ -4084,10 +4084,10 @@ var qrcode = function() {
       }).catch(function(){ PROFILE={nome:'Administrador',status:'aprovado'}; enterHub(); });
       return;
     }
-    sb.from('profiles').select('nome,status,criado_em,foto,role,cpf,nascimento,telefone,cep,endereco,numero,complemento,bairro,cidade,uf,trabalha_banco,banco').eq('id',user.id).single().then(function(r){
+    sb.from('profiles').select('nome,status,criado_em,foto,role,cpf,nascimento,telefone,cep,endereco,numero,complemento,bairro,cidade,uf,trabalha_banco,banco,senha_temp,senha_temp_em,banco_confirmado').eq('id',user.id).single().then(function(r){
       if(r.error||!r.data){ showGate('reproved'); return; }
       PROFILE=r.data;
-      if(r.data.status==='aprovado'){ if(!r.data.cpf||!String(r.data.cpf).trim()){ showCompletar(r.data); } else { var _falta=camposFaltando(r.data); if(_falta.length){ showPendencia(r.data,_falta); } else { enterHub(); } } try{ checkPendencias(); }catch(e){} }
+      if(r.data.status==='aprovado'){ if(!r.data.cpf||!String(r.data.cpf).trim()){ showCompletar(r.data); } else { var _falta=camposFaltando(r.data); if(_falta.length){ showPendencia(r.data,_falta); } else { entrarOuConfirmar(); } } try{ checkPendencias(); }catch(e){} }
       else if(r.data.status==='reprovado'){ showGate('reproved'); }
       else { showGate('pending'); }
     });
@@ -4227,6 +4227,45 @@ var qrcode = function() {
     var panel=document.querySelector('.eb-drawer-panel'); var mi=qs('eb-sup-menu');
     if(panel&&href){ if(!mi){ mi=document.createElement('a'); mi.id='eb-sup-menu'; mi.className='dw-item'; mi.target='_blank'; mi.rel='noopener'; mi.innerHTML="<span class='dw-ic'><img src='"+SUP_LOGO+"' alt='' style='width:24px;height:24px;border-radius:6px;object-fit:cover'></span><span>Falar com o suporte</span>"; mi.onclick=function(){ var d=qs('eb-drawer'); if(d)d.classList.remove('on'); }; panel.appendChild(mi); } mi.setAttribute('href',href); }
     else if(mi&&mi.parentNode){ mi.parentNode.removeChild(mi); }
+  }
+  function entrarOuConfirmar(){
+    try{ if(PROFILE && String(PROFILE.trabalha_banco)==='nao' && !PROFILE.banco_confirmado){ confirmarBanco(); return; } }catch(e){}
+    enterHub();
+  }
+  function confirmarBanco(){
+    var old=document.getElementById('eb-confbanco'); if(old&&old.parentNode)old.parentNode.removeChild(old);
+    var ov=document.createElement('div'); ov.id='eb-confbanco'; ov.className='eb-ov on';
+    ov.innerHTML="<div class='eb-card' style='max-width:430px'>"
+      +"<div class='eb-kick'>Central do Gerente</div><h1 class='eb-h' style='font-size:1.3rem'>Confirme seu cadastro</h1>"
+      +"<p class='eb-sub'>Só pra confirmar, bem rapidinho: você trabalha em algum banco?</p>"
+      +"<div style='display:flex;gap:10px;margin:4px 0 6px'><button class='eb-btn' id='eb-cb-sim' style='flex:1'>Sim, trabalho</button><button class='eb-btn ghost' id='eb-cb-nao' style='flex:1'>Não trabalho</button></div>"
+      +"<div class='eb-field' id='eb-cb-wrap' style='display:none;margin-top:10px'><label>Em qual banco você trabalha?</label><input id='eb-cb-banco' placeholder='Ex: Itaú, Bradesco, Caixa...'></div>"
+      +"<button class='eb-btn' id='eb-cb-save' style='display:none;margin-top:6px'>Salvar e continuar</button>"
+      +"<div id='eb-cb-msg' class='eb-msg'></div>"
+      +"</div>";
+    document.body.appendChild(ov);
+    function fim(){ var o=document.getElementById('eb-confbanco'); if(o&&o.parentNode)o.parentNode.removeChild(o); enterHub(); }
+    qs('eb-cb-nao').onclick=function(){ var b=this; b.disabled=true; sb.from('profiles').update({banco_confirmado:true}).eq('id',CURRENT.id).then(function(){ if(PROFILE)PROFILE.banco_confirmado=true; fim(); }, function(){ fim(); }); };
+    qs('eb-cb-sim').onclick=function(){ qs('eb-cb-wrap').style.display='block'; qs('eb-cb-save').style.display='block'; this.disabled=true; var nb=qs('eb-cb-nao'); if(nb)nb.disabled=true; var inp=qs('eb-cb-banco'); if(inp)inp.focus(); };
+    qs('eb-cb-save').onclick=function(){ var banco=(qs('eb-cb-banco').value||'').trim(); if(!banco){ setMsg('eb-cb-msg','err','Diga em qual banco você trabalha.'); return; } var b=this; b.disabled=true; sb.from('profiles').update({trabalha_banco:'sim',banco:banco,banco_confirmado:true}).eq('id',CURRENT.id).then(function(r){ if(r&&r.error){ b.disabled=false; setMsg('eb-cb-msg','err',traduz(r.error.message)); return; } if(PROFILE){PROFILE.trabalha_banco='sim';PROFILE.banco=banco;PROFILE.banco_confirmado=true;} fim(); }, function(){ b.disabled=false; setMsg('eb-cb-msg','err','Não consegui salvar agora.'); }); };
+  }
+  function renderSenhaTemp(){
+    try{ var old=document.getElementById('eb-stemp'); if(old&&old.parentNode)old.parentNode.removeChild(old); }catch(e){}
+    try{ if(window._stempTimer){ clearInterval(window._stempTimer); window._stempTimer=null; } }catch(e){}
+    if(!(PROFILE&&PROFILE.senha_temp)) return;
+    var hub=qs('hub'); if(!hub) return;
+    if(!document.getElementById('eb-stemp-css')){ var st=document.createElement('style'); st.id='eb-stemp-css'; st.textContent=".eb-stemp{max-width:620px;margin:0 auto 14px;background:linear-gradient(135deg,#2a2410,#231f0c);border:1px solid #f5c542;border-radius:14px;padding:12px 14px;color:#ffe2a0;font:600 12.5px/1.55 Inter,sans-serif;box-shadow:0 0 0 1px rgba(245,197,66,.15)}.eb-stemp b{color:#ffd36b;font-weight:800}.eb-stemp .st-t{font:800 13px/1.2 Sora,Inter,sans-serif;color:#ffd36b;display:flex;align-items:center;gap:6px;margin-bottom:5px}"; document.head.appendChild(st); }
+    var el=document.createElement('div'); el.id='eb-stemp'; el.className='eb-stemp';
+    hub.insertBefore(el, hub.firstChild);
+    var base=PROFILE.senha_temp_em?new Date(PROFILE.senha_temp_em).getTime():Date.now();
+    var deadline=base + 24*3600*1000;
+    function tick(){
+      var ms=deadline-Date.now(); var txt;
+      if(ms>0){ var h=Math.floor(ms/3600000); var m=Math.floor((ms%3600000)/60000); txt="O suporte tem até <b>"+h+"h"+(m<10?'0':'')+m+"min</b> para confirmar o seu acesso."; }
+      else { txt="O prazo de 24h passou. Se esta mensagem ainda aparece, <b>fale com o suporte</b>."; }
+      el.innerHTML="<div class='st-t'>🔐 Senha temporária</div>Seu acesso já está liberado com a nova senha. "+txt+" Se esta mensagem não sumir, entre em contato com o suporte.";
+    }
+    tick(); try{ window._stempTimer=setInterval(tick,30000); }catch(e){}
   }
   function renderHomeExtras(){
     var hub=qs('hub'); if(!hub)return;
@@ -4951,7 +4990,7 @@ var qrcode = function() {
       if(cep.replace(/\D/g,'').length!==8){ setMsg('eb-signup-msg','err','Informe um CEP válido.'); return; }
       if(trab==='sim' && !banco){ setMsg('eb-signup-msg','err','Diga em qual banco você trabalha.'); return; }
       var b=qs('eb-btn-signup'); b.disabled=true;
-      var meta={nome:nome,cpf:cpf,nascimento:dataISO(nasc),telefone:tel,cep:cep,endereco:end,numero:num,complemento:comp,bairro:bairro,cidade:cidade,uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:'')};
+      var meta={nome:nome,cpf:cpf,nascimento:dataISO(nasc),telefone:tel,cep:cep,endereco:end,numero:num,complemento:comp,bairro:bairro,cidade:cidade,uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:''),banco_confirmado:true};
       function _create(){ sb.auth.signUp({email:email,password:p1,options:{data:meta}}).then(function(r){ b.disabled=false;
         if(r.error){ setMsg('eb-signup-msg','err',traduz(r.error.message)); return; }
         showGate('pending');
@@ -4964,30 +5003,32 @@ var qrcode = function() {
       var _cep=qs('eb-s-cep'); if(_cep){ _cep.addEventListener('input',function(){ this.value=maskCEP(this.value); if(this.value.replace(/\D/g,'').length===8) buscaCEP(); }); _cep.addEventListener('blur',buscaCEP); }
       var _stel=qs('eb-s-tel'); if(_stel) _stel.addEventListener('input',function(){ this.value=maskTel(this.value); });
       var _nasc=qs('eb-s-nasc'); if(_nasc) _nasc.addEventListener('input',function(){ this.value=maskData(this.value); });
-      var _trab=qs('eb-s-trab'); if(_trab) _trab.addEventListener('change',function(){ var w=qs('eb-s-banco-wrap'); if(w) w.style.display=(this.value==='sim')?'block':'none'; });
+      var _trab=qs('eb-s-trab'); if(_trab){ _trab.addEventListener('change',function(){ var w=qs('eb-s-banco-wrap'); if(w) w.style.display=(this.value==='sim')?'block':'none'; }); var _w0=qs('eb-s-banco-wrap'); if(_w0) _w0.style.display=(_trab.value==='sim')?'block':'none'; }
     })();
     // forgot
     qs('eb-btn-forgot').onclick=function(){
-      var email=qs('eb-f-email').value.trim(), cpf=qs('eb-f-cpf').value.trim(), tel=qs('eb-f-tel').value.trim(), p1=qs('eb-f-pass').value, p2=qs('eb-f-pass2').value; clearMsg('eb-forgot-msg');
+      var email=qs('eb-f-email').value.trim(), cpf=qs('eb-f-cpf').value.trim(), p1=qs('eb-f-pass').value, p2=qs('eb-f-pass2').value; clearMsg('eb-forgot-msg');
       if(!email){ setMsg('eb-forgot-msg','err','Digite o seu e-mail.'); return; }
       if(cpf.replace(/\D/g,'').length!==11){ setMsg('eb-forgot-msg','err','Informe um CPF válido.'); return; }
-      if(tel.replace(/\D/g,'').length<10){ setMsg('eb-forgot-msg','err','Informe um telefone válido.'); return; }
       if(p1.length<6){ setMsg('eb-forgot-msg','err','A nova senha precisa ter ao menos 6 caracteres.'); return; }
       if(p1!==p2){ setMsg('eb-forgot-msg','err','As senhas não conferem.'); return; }
-      var b=qs('eb-btn-forgot'); b.disabled=true;
-      function enviarRedef(){
-        sb.from('redefinicoes').insert({email:email,cpf:cpf,telefone:tel,nova_senha:p1}).then(function(r){ b.disabled=false;
-          if(r&&r.error){ setMsg('eb-forgot-msg','err', /redefinicoes|schema cache|Could not find the table|does not exist/i.test(r.error.message||'')?'A redefinição ainda não foi ativada no banco. Peça pra rodar o redefinicao-senha.sql no Supabase.':traduz(r.error.message)); return; }
-          qs('eb-f-cpf').value=''; qs('eb-f-tel').value=''; qs('eb-f-pass').value=''; qs('eb-f-pass2').value='';
-          setMsg('eb-forgot-msg','ok','Pedido enviado! Assim que o Ensina Banco aprovar, você entra com a nova senha. 💚');
-        }, function(){ b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui enviar agora.'); });
+      var b=qs('eb-btn-forgot'); b.disabled=true; setMsg('eb-forgot-msg','ok','Verificando seus dados...');
+      function entrarTemp(){
+        sb.auth.signInWithPassword({email:email,password:p1}).then(function(r2){ b.disabled=false;
+          if(r2&&r2.error){ setMsg('eb-forgot-msg','ok','Pronto! Sua nova senha já está valendo. Entre com ela na tela de login. 💚'); setTimeout(function(){ showGate('login'); var le=qs('eb-l-email'); if(le)le.value=email; },1600); return; }
+          var u=r2&&r2.data&&r2.data.user; if(u){ route(u); } else { showGate('login'); }
+        }, function(){ b.disabled=false; setMsg('eb-forgot-msg','ok','Pronto! Sua nova senha já está valendo. Entre com ela na tela de login. 💚'); });
       }
-      function bloquearSemConta(){ b.disabled=false; setMsg('eb-forgot-msg','err','Você ainda não tem acesso. Crie a sua conta primeiro para poder entrar. Te levei para o "Criar conta". 💚'); setTimeout(function(){ try{ showGate('signup'); var se=qs('eb-s-email'); if(se)se.value=email; var sc=qs('eb-s-cpf'); if(sc)sc.value=cpf; setMsg('eb-signup-msg','err','Você ainda não tem acesso. Crie a sua conta aqui para começar. 💚'); }catch(e){} }, 1400); }
-      sb.rpc('conta_existe',{p_email:email,p_cpf:cpf.replace(/\D/g,'')}).then(function(rc){
-        if(rc && !rc.error && (rc.data==='email' || rc.data==='cpf' || rc.data==='sim')){ enviarRedef(); return; }
-        if(rc && !rc.error && rc.data==='nao'){ bloquearSemConta(); return; }
-        b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui confirmar seu cadastro agora. Recarregue a página (F5) e tente de novo. Se persistir, fale com o suporte.');
-      }, function(){ b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui confirmar seu cadastro agora. Recarregue a página (F5) e tente de novo.'); });
+      sb.rpc('redefinir_temp',{p_email:email,p_cpf:cpf.replace(/\D/g,''),p_senha:p1}).then(function(rc){
+        if(rc && rc.error){ b.disabled=false; setMsg('eb-forgot-msg','err', /function|does not exist|schema cache|Could not find/i.test(rc.error.message||'')?'A redefinição temporária ainda não foi ativada no banco. Rode o redefinicao-temporaria.sql no Supabase.':traduz(rc.error.message)); return; }
+        var d=rc&&rc.data;
+        if(d==='ok'){ setMsg('eb-forgot-msg','ok','Dados confirmados! Liberando o seu acesso... 💚'); entrarTemp(); return; }
+        b.disabled=false;
+        if(d==='nao_email'){ setMsg('eb-forgot-msg','err','Esse e-mail não está cadastrado. Confira o e-mail da sua conta ou crie uma conta.'); return; }
+        if(d==='cpf_errado'){ setMsg('eb-forgot-msg','err','O CPF não confere com esse e-mail. Confira os dois e tente de novo.'); return; }
+        if(d==='senha_curta'){ setMsg('eb-forgot-msg','err','A nova senha precisa ter ao menos 6 caracteres.'); return; }
+        setMsg('eb-forgot-msg','err','Não consegui liberar agora. Recarregue a página (F5) e tente de novo.');
+      }, function(){ b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui liberar agora. Recarregue a página (F5) e tente de novo.'); });
     };
     var _fcpf=qs('eb-f-cpf'); if(_fcpf) _fcpf.addEventListener('input',function(){ this.value=maskCPF(this.value); });
     var _ftel=qs('eb-f-tel'); if(_ftel) _ftel.addEventListener('input',function(){ this.value=maskTel(this.value); });
@@ -5140,7 +5181,7 @@ var qrcode = function() {
         +"<div style='display:flex;gap:10px'><div class='eb-field' style='flex:1'><label>Número</label><input id='eb-c-num' inputmode='numeric'></div><div class='eb-field' style='flex:1'><label>Complemento</label><input id='eb-c-comp'></div></div>"
         +"<div class='eb-field'><label>Bairro</label><input id='eb-c-bairro'></div>"
         +"<div style='display:flex;gap:10px'><div class='eb-field' style='flex:2'><label>Cidade</label><input id='eb-c-cidade'></div><div class='eb-field' style='flex:1'><label>UF</label><input id='eb-c-uf' maxlength='2' style='text-transform:uppercase'></div></div>"
-        +"<div class='eb-field'><label>Já trabalha em banco?</label><select id='eb-c-trab' style='width:100%;background:#0f1619;border:1px solid #27333a;border-radius:10px;color:#eafff3;padding:11px 12px'><option value='nao'>Não</option><option value='sim'>Sim</option></select></div>"
+        +"<div class='eb-field'><label>Já trabalha em banco?</label><select id='eb-c-trab' style='width:100%;background:#0f1619;border:1px solid #27333a;border-radius:10px;color:#eafff3;padding:11px 12px'><option value='sim'>Sim</option><option value='nao'>Não</option></select></div>"
         +"<div class='eb-field' id='eb-c-banco-wrap' style='display:none'><label>Qual banco?</label><input id='eb-c-banco' placeholder='Ex: Itaú, Bradesco, Caixa...'></div>"
         +"<div class='eb-field'><label>Crie uma senha nova <small style='color:#8fa1ac'>(obrigatório)</small></label><input id='eb-cc-pass' type='password' autocomplete='new-password' placeholder='sua nova senha (mín. 6)'></div>"
         +"<button class='eb-btn' id='eb-c-save'>Salvar e entrar</button>"
@@ -5153,7 +5194,7 @@ var qrcode = function() {
       addI('eb-c-nasc',function(){this.value=maskData(this.value);});
       addI('eb-c-tel',function(){this.value=maskTel(this.value);});
       var cc=qs('eb-c-cep'); if(cc){ cc.addEventListener('input',function(){this.value=maskCEP(this.value); if(this.value.replace(/\D/g,'').length===8) buscaCEPInto('eb-c-cep','eb-c-end','eb-c-bairro','eb-c-cidade','eb-c-uf');}); cc.addEventListener('blur',function(){ buscaCEPInto('eb-c-cep','eb-c-end','eb-c-bairro','eb-c-cidade','eb-c-uf'); }); }
-      var tr=qs('eb-c-trab'); if(tr)tr.addEventListener('change',function(){ var w=qs('eb-c-banco-wrap'); if(w)w.style.display=(this.value==='sim')?'block':'none'; });
+      var tr=qs('eb-c-trab'); if(tr){tr.addEventListener('change',function(){ var w=qs('eb-c-banco-wrap'); if(w)w.style.display=(this.value==='sim')?'block':'none'; }); var _w0=qs('eb-c-banco-wrap'); if(_w0)_w0.style.display=(tr.value==='sim')?'block':'none';}
       qs('eb-c-save').onclick=salvarCadastroCompleto;
       var sx=qs('eb-c-sair'); if(sx)sx.onclick=function(){ try{sb.auth.signOut();}catch(e){} try{location.reload();}catch(e){} };
     } else { ov.classList.add('on'); }
@@ -5170,7 +5211,7 @@ var qrcode = function() {
     if(trab==='sim' && !banco){ setMsg('eb-c-msg','err','Diga em qual banco você trabalha.'); return; }
     if(!npass || npass.length<6){ setMsg('eb-c-msg','err','Crie uma senha nova com ao menos 6 caracteres (troque a senha padrão).'); return; }
     var b=qs('eb-c-save'); if(b)b.disabled=true;
-    var patch={cpf:cpf,nascimento:dataISO(nasc),telefone:tel,cep:cep,endereco:end,numero:num,complemento:comp,bairro:bairro,cidade:cidade,uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:'')};
+    var patch={cpf:cpf,nascimento:dataISO(nasc),telefone:tel,cep:cep,endereco:end,numero:num,complemento:comp,bairro:bairro,cidade:cidade,uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:''),banco_confirmado:true};
     function finish(){ sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ setMsg('eb-c-msg','err',traduz(r.error.message)); return; } try{ if(PROFILE){ var k; for(k in patch) PROFILE[k]=patch[k]; } }catch(e){} var ov=qs('eb-completar'); if(ov)ov.classList.remove('on'); enterHub(); }).catch(function(e){ if(b)b.disabled=false; setMsg('eb-c-msg','err',traduz(e&&e.message)); }); }
     function afterCpf(){ if(npass){ sb.auth.updateUser({password:npass}).then(function(){ finish(); },function(){ finish(); }); } else { finish(); } }
     sb.rpc('cpf_existe',{p_cpf:cpf.replace(/\D/g,'')}).then(function(rc){ if(rc && !rc.error && rc.data===true){ if(b)b.disabled=false; setMsg('eb-c-msg','err','Este CPF já está cadastrado em outra conta.'); return; } afterCpf(); }).catch(function(){ afterCpf(); });
@@ -5219,7 +5260,7 @@ var qrcode = function() {
     if(cep && cep.replace(/\D/g,'').length!==8){ err('CEP inválido.'); return; }
     if(uf && uf.length!==2){ err('UF deve ter 2 letras.'); return; }
     if(trab==='sim' && !banco){ err('Diga em qual banco você trabalha.'); return; }
-    var patch={telefone:tel,cep:cep,endereco:g('eb-ac-end'),numero:g('eb-ac-num'),complemento:g('eb-ac-comp'),bairro:g('eb-ac-bairro'),cidade:g('eb-ac-cidade'),uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:'')};
+    var patch={telefone:tel,cep:cep,endereco:g('eb-ac-end'),numero:g('eb-ac-num'),complemento:g('eb-ac-comp'),bairro:g('eb-ac-bairro'),cidade:g('eb-ac-cidade'),uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:''),banco_confirmado:true};
     var b=document.getElementById('eb-ac-save'); if(b)b.disabled=true;
     sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ err(traduz(r.error.message)); return; } try{ for(var k in patch) PROFILE[k]=patch[k]; }catch(e){} _contaEdit=false; montarDadosConta(); try{ montarCarteirinha(); }catch(e){} if(msg){msg.className='eb-msg ok';msg.style.display='block';msg.textContent='Dados atualizados! 💚';} }).catch(function(e){ if(b)b.disabled=false; err(traduz(e&&e.message)); });
   }
@@ -5275,11 +5316,11 @@ var qrcode = function() {
     if(!err&&need('cidade')){ var c1=g('eb-pd-cidade'); if(!c1) err='Informe a cidade.'; else patch.cidade=c1; }
     if(!err&&need('uf')){ var u1=g('eb-pd-uf').toUpperCase(); if(u1.length!==2) err='Informe a UF (2 letras).'; else patch.uf=u1; }
     var trabFinal=(qs('eb-pd-trabalha_banco')?qs('eb-pd-trabalha_banco').value:((PROFILE&&PROFILE.trabalha_banco)||''));
-    if(!err&&need('trabalha_banco')){ if(!trabFinal) err='Diga se você já trabalha em banco.'; else patch.trabalha_banco=trabFinal; }
+    if(!err&&need('trabalha_banco')){ if(!trabFinal) err='Diga se você já trabalha em banco.'; else { patch.trabalha_banco=trabFinal; patch.banco_confirmado=true; } }
     if(!err){ var simFinal=trabFinal==='sim'; if(simFinal){ var bc=g('eb-pd-banco'); if(!bc) err='Diga em qual banco você trabalha.'; else patch.banco=bc; } }
     if(err){ setMsg('eb-pd-msg','err',err); return; }
     var b=qs('eb-pd-save'); if(b)b.disabled=true;
-    sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ setMsg('eb-pd-msg','err',traduz(r.error.message)); return; } try{ if(PROFILE){ for(var k in patch) PROFILE[k]=patch[k]; } }catch(e){} var f2=camposFaltando(PROFILE); if(f2.length){ showPendencia(PROFILE,f2); return; } var ov=qs('eb-pendencia'); if(ov)ov.classList.remove('on'); enterHub(); }).catch(function(e){ if(b)b.disabled=false; setMsg('eb-pd-msg','err',traduz(e&&e.message)); });
+    sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ setMsg('eb-pd-msg','err',traduz(r.error.message)); return; } try{ if(PROFILE){ for(var k in patch) PROFILE[k]=patch[k]; } }catch(e){} var f2=camposFaltando(PROFILE); if(f2.length){ showPendencia(PROFILE,f2); return; } var ov=qs('eb-pendencia'); if(ov)ov.classList.remove('on'); entrarOuConfirmar(); }).catch(function(e){ if(b)b.disabled=false; setMsg('eb-pd-msg','err',traduz(e&&e.message)); });
   }
     function openMelhoria(){
     var ov=qs('eb-melh');
@@ -5465,11 +5506,11 @@ var qrcode = function() {
     var box=qs('eb-rs-list'); if(!box)return;
     if(!(sb&&CURRENT&&isAdm())){ box.innerHTML="<div class='eb-empty'>Entre como admin pra ver.</div>"; return; }
     box.innerHTML="<div class='eb-empty'>Carregando...</div>";
-    sb.from('redefinicoes').select('id,email,cpf,telefone,status,criado_em').eq('status','pendente').order('criado_em',{ascending:false}).then(function(r){
+    sb.from('redefinicoes').select('id,email,cpf,telefone,nova_senha,status,criado_em').eq('status','pendente').order('criado_em',{ascending:false}).then(function(r){
       if(r.error){ box.innerHTML="<div class='eb-empty'>"+(/redefinicoes|schema cache|Could not find the table|does not exist/i.test(r.error.message||'')?'Rode o redefinicao-senha.sql no Supabase pra ativar.':('Erro: '+esc(r.error.message)))+"</div>"; return; }
       var list=r.data||[];
       if(!list.length){ box.innerHTML="<div class='eb-empty'>Nenhum pedido de senha. \uD83C\uDF89</div>"; return; }
-      box.innerHTML=''; var sel={};
+      box.innerHTML=''; var sel={}, byId={}; list.forEach(function(x){ byId[x.id]=x; });
       var bar=document.createElement('div'); bar.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#0f1619;border:1px solid #223038;border-radius:12px;padding:10px 12px;margin-bottom:10px';
       bar.innerHTML="<label style='display:inline-flex;align-items:center;gap:7px;color:#cfe0da;font:700 12.5px/1 Sora,sans-serif;cursor:pointer'><input type='checkbox' id='selAllRs' style='width:17px;height:17px'> Selecionar todos</label><div style='display:flex;gap:8px;flex-wrap:wrap'><button class='ap' id='bulkApRs'>&#9989; Aprovar selecionados</button><button class='rp' id='bulkRpRs'>Reprovar</button></div>";
       box.appendChild(bar);
@@ -5477,28 +5518,43 @@ var qrcode = function() {
       list.forEach(function(a){
         var d=document.createElement('div'); d.className='eb-alu';
         var chk="<label style='display:inline-flex;align-items:center;gap:6px;color:#8ea2ac;font:600 11.5px/1 Inter,sans-serif;margin-bottom:7px;cursor:pointer'><input type='checkbox' data-selrs='"+a.id+"' style='width:16px;height:16px'> selecionar</label>";
-        d.innerHTML=chk+"<div class='nm'>"+esc(a.email||'')+"</div><div class='em'>\uD83E\uDEAA "+esc(a.cpf||'-')+" \u00b7 \uD83D\uDCF1 "+esc(a.telefone||'-')+"</div><div class='dt'>&#128197; "+fmtData(a.criado_em)+"</div>";
+        var isTemp=(a.nova_senha==='(tempor\u00E1ria)');
+        var tempTag=isTemp?"<span style='display:inline-block;margin-bottom:6px;background:#2a2410;border:1px solid #f5c542;color:#ffd36b;font:800 10px/1 Sora,sans-serif;padding:4px 8px;border-radius:999px'>\u23F3 Acesso j\u00E1 liberado (tempor\u00E1rio)</span><br>":"";
+        d.innerHTML=chk+tempTag+"<div class='nm'>"+esc(a.email||'')+"</div><div class='em'>\uD83E\uDEAA "+esc(a.cpf||'-')+(a.telefone?(" \u00b7 \uD83D\uDCF1 "+esc(a.telefone)):"")+"</div><div class='dt'>&#128197; "+fmtData(a.criado_em)+"</div>";
         var acts=document.createElement('div'); acts.className='acts';
-        var ap=document.createElement('button'); ap.className='ap'; ap.innerHTML='&#9989; Aprovar'; ap.onclick=function(){ aprovarRedef(a); };
+        var ap=document.createElement('button'); ap.className='ap'; ap.innerHTML=isTemp?'&#9989; Confirmar':'&#9989; Aprovar'; ap.onclick=function(){ aprovarRedef(a); };
         var rp=document.createElement('button'); rp.className='rp'; rp.textContent='Reprovar'; rp.onclick=function(){ reprovarRedef(a); };
         acts.appendChild(ap); acts.appendChild(rp); d.appendChild(acts); box.appendChild(d);
-        var cb=d.querySelector('[data-selrs]'); if(cb) cb.onchange=function(){ if(cb.checked) sel[a.id]=1; else delete sel[a.id]; var sa=qs('selAllRs'); if(sa) sa.checked=(Object.keys(sel).length===list.length); refreshBulk(); };
+        var cb=d.querySelector('[data-selrs]'); if(cb) cb.onchange=function(){ if(cb.checked) sel[a.id]=a; else delete sel[a.id]; var sa=qs('selAllRs'); if(sa) sa.checked=(Object.keys(sel).length===list.length); refreshBulk(); };
       });
-      var sa=qs('selAllRs'); if(sa) sa.onchange=function(){ box.querySelectorAll('[data-selrs]').forEach(function(cb){ cb.checked=sa.checked; var id=cb.getAttribute('data-selrs'); if(sa.checked) sel[id]=1; else delete sel[id]; }); refreshBulk(); };
-      var ba=qs('bulkApRs'); if(ba) ba.onclick=function(){ bulkRedef(Object.keys(sel),true); };
-      var br=qs('bulkRpRs'); if(br) br.onclick=function(){ bulkRedef(Object.keys(sel),false); };
+      var sa=qs('selAllRs'); if(sa) sa.onchange=function(){ box.querySelectorAll('[data-selrs]').forEach(function(cb){ cb.checked=sa.checked; var id=cb.getAttribute('data-selrs'); if(sa.checked) sel[id]=byId[id]; else delete sel[id]; }); refreshBulk(); };
+      var ba=qs('bulkApRs'); if(ba) ba.onclick=function(){ bulkRedef(Object.keys(sel).map(function(id){return sel[id];}),true); };
+      var br=qs('bulkRpRs'); if(br) br.onclick=function(){ bulkRedef(Object.keys(sel).map(function(id){return sel[id];}),false); };
     }); }
-  function bulkRedef(ids, aprovar){
-    if(!ids.length){ alert('Selecione pelo menos um pedido.'); return; }
-    if(aprovar){ if(!confirm('Aprovar '+ids.length+' senha(s)? Confira antes se o CPF e o telefone batem com o cadastro.')) return; }
-    else { if(!confirm('Reprovar '+ids.length+' pedido(s) de senha?')) return; }
-    var fn=aprovar?'admin_aprovar_redefinicao':'admin_reprovar_redefinicao';
-    var done=0, fail=0, total=ids.length;
-    ids.forEach(function(id){ sb.rpc(fn,{req_id:id}).then(function(r){ if(r&&r.error) fail++; step(); }, function(){ fail++; step(); }); });
-    function step(){ done++; if(done===total){ if(fail) alert('Alguns n\u00E3o deram certo ('+fail+' de '+total+'). Tente de novo.'); loadRedefs(); } }
+  function _redefIsTemp(a){ return a && a.nova_senha==='(temporária)'; }
+  function _doAprovarRedef(a, cb){
+    if(_redefIsTemp(a)){
+      sb.rpc('aprovar_senha_temp',{p_email:a.email}).then(function(r){ if(r&&r.error){ cb(false,r.error.message); return; } sb.from('redefinicoes').update({status:'aprovado'}).eq('id',a.id).then(function(){ cb(true); },function(){ cb(true); }); }, function(){ cb(false); });
+    } else {
+      sb.rpc('admin_aprovar_redefinicao',{req_id:a.id}).then(function(r){ cb(!(r&&r.error), r&&(r.error?r.error.message:r.data)); }, function(){ cb(false); });
+    }
   }
-  function aprovarRedef(a){ if(!confirm('Aprovar a nova senha de '+a.email+'?\\nConfira se o CPF e o telefone batem com o cadastro.')) return; sb.rpc('admin_aprovar_redefinicao',{req_id:a.id}).then(function(r){ if(r&&r.error){ alert('Não consegui: '+r.error.message); return; } var m=(r&&r.data)||'ok'; if(m!=='ok'){ alert(m); } loadRedefs(); }, function(){ alert('Não consegui aprovar agora.'); }); }
-  function reprovarRedef(a){ sb.rpc('admin_reprovar_redefinicao',{req_id:a.id}).then(function(){ loadRedefs(); }, function(){ loadRedefs(); }); }
+  function _doReprovarRedef(a, cb){
+    if(_redefIsTemp(a)){
+      sb.rpc('aprovar_senha_temp',{p_email:a.email}).then(function(){ sb.from('redefinicoes').update({status:'reprovado'}).eq('id',a.id).then(function(){ cb(true); },function(){ cb(true); }); }, function(){ cb(false); });
+    } else {
+      sb.rpc('admin_reprovar_redefinicao',{req_id:a.id}).then(function(){ cb(true); }, function(){ cb(false); });
+    }
+  }
+  function bulkRedef(recs, aprovar){
+    if(!recs||!recs.length){ alert('Selecione pelo menos um pedido.'); return; }
+    if(aprovar){ if(!confirm('Confirmar '+recs.length+' acesso(s)?')) return; }
+    else { if(!confirm('Reprovar '+recs.length+' pedido(s)?')) return; }
+    var done=0, fail=0, total=recs.length;
+    recs.forEach(function(a){ (aprovar?_doAprovarRedef:_doReprovarRedef)(a,function(ok){ if(!ok)fail++; done++; if(done===total){ if(fail) alert('Alguns não deram certo ('+fail+' de '+total+'). Tente de novo.'); loadRedefs(); } }); });
+  }
+  function aprovarRedef(a){ if(!confirm((_redefIsTemp(a)?'Confirmar o acesso de ':'Aprovar a nova senha de ')+a.email+'?')) return; _doAprovarRedef(a,function(ok,msg){ if(!ok){ alert('Não consegui: '+(msg||'tente de novo.')); return; } if(msg&&msg!=='ok'&&typeof msg==='string'){ alert(msg); } loadRedefs(); }); }
+  function reprovarRedef(a){ if(!confirm('Reprovar o pedido de '+a.email+'?')) return; _doReprovarRedef(a,function(){ loadRedefs(); }); }
   function sugItemEl(a, mode){
     var d=document.createElement('div'); d.className='eb-alu';
     d.innerHTML="<div class='sugcat'>"+esc(a.categoria||'')+"</div><div class='nm'>"+esc(a.autor||'(sem autor)')+"</div><div class='sugtx'>"+esc(a.texto||'')+"</div><div class='dt'>&#128197; "+fmtData(a.criado_em)+"</div>";
