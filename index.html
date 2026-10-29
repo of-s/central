@@ -4984,7 +4984,7 @@ var qrcode = function() {
       }
       function bloquearSemConta(){ b.disabled=false; setMsg('eb-forgot-msg','err','Você ainda não tem acesso. Crie a sua conta primeiro para poder entrar. Te levei para o "Criar conta". 💚'); setTimeout(function(){ try{ showGate('signup'); var se=qs('eb-s-email'); if(se)se.value=email; var sc=qs('eb-s-cpf'); if(sc)sc.value=cpf; setMsg('eb-signup-msg','err','Você ainda não tem acesso. Crie a sua conta aqui para começar. 💚'); }catch(e){} }, 1400); }
       sb.rpc('conta_existe',{p_email:email,p_cpf:cpf.replace(/\D/g,'')}).then(function(rc){
-        if(rc && !rc.error && rc.data==='sim'){ enviarRedef(); return; }
+        if(rc && !rc.error && (rc.data==='email' || rc.data==='cpf' || rc.data==='sim')){ enviarRedef(); return; }
         if(rc && !rc.error && rc.data==='nao'){ bloquearSemConta(); return; }
         b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui confirmar seu cadastro agora. Recarregue a página (F5) e tente de novo. Se persistir, fale com o suporte.');
       }, function(){ b.disabled=false; setMsg('eb-forgot-msg','err','Não consegui confirmar seu cadastro agora. Recarregue a página (F5) e tente de novo.'); });

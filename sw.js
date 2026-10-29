@@ -3,7 +3,7 @@
    Sempre tenta baixar a versão mais nova do site; só usa o cache quando está offline.
    Assim, toda vez que você subir uma versão nova no GitHub, ela aparece na hora.
    Troque o número da versão abaixo a cada atualização grande (opcional). */
-const CACHE = 'central-ensina-v309';
+const CACHE = 'central-ensina-v310';
 
 self.addEventListener('install', function(e){
   // ativa o SW novo imediatamente, sem esperar fechar as abas
