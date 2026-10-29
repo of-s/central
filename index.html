@@ -3969,7 +3969,7 @@ var qrcode = function() {
       +"<div class='eb-row'><div class='k'>Nome</div><div class='v' id='eb-acc-nome'>-</div></div>"
       +"<div class='eb-row'><div class='k'>E-mail</div><div class='v' id='eb-acc-email'>-</div></div>"
     +"</div>"
-    +"<div class='eb-box'>"
+    +"<div class='eb-box collapsed' id='eb-acc-dados-box'>"
       +"<div class='eb-sec-title'>Meus dados</div>"
       +"<div id='eb-acc-dados'></div>"
     +"</div>"
@@ -4028,7 +4028,7 @@ var qrcode = function() {
   function checkPendencias(){
     try{ if(!(sb&&CURRENT&&isAdm())){ _setPend(0); return; } }catch(e){ return; }
     function cnt(tbl){ return sb.from(tbl).select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r){ return (r&&typeof r.count==='number')?r.count:0; }, function(){ return 0; }); }
-    Promise.all([cnt('profiles'),cnt('redefinicoes'),cnt('feedbacks'),cnt('melhorias')]).then(function(res){ var tot=(res[0]||0)+(res[1]||0)+(res[2]||0)+(res[3]||0); _setPend(tot); }, function(){ });
+    Promise.all([cnt('profiles'),cnt('redefinicoes'),cnt('feedbacks'),cnt('melhorias'),cnt('sugestoes')]).then(function(res){ var tot=(res[0]||0)+(res[1]||0)+(res[2]||0)+(res[3]||0)+(res[4]||0); _setPend(tot); }, function(){ });
   }
   window.checkPendencias=checkPendencias;
   function notifPendentes(){
@@ -4654,6 +4654,7 @@ var qrcode = function() {
     clearMsg('eb-acc-nome-msg'); clearMsg('eb-acc-pass-msg');
     try{ montarCarteirinha(); }catch(e){}
     try{ _contaEdit=false; montarDadosConta(); }catch(e){}
+    try{ var _db=document.getElementById('eb-acc-dados-box'); if(_db){ _db.classList.add('collapsed'); var _dt=_db.querySelector('.eb-sec-title'); if(_dt && !_dt._cw){ _dt._cw=true; var _ar=document.createElement('span'); _ar.className='eb-arrow'; _ar.textContent='▾'; _dt.appendChild(_ar); _dt.addEventListener('click',function(){ _db.classList.toggle('collapsed'); }); } } }catch(e){}
     qs('eb-account').classList.add('on');
   }
   function _cartMono(){ return "<svg viewBox='0 0 100 100'><defs><linearGradient id='cmg' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#17CFE4'/><stop offset='.5' stop-color='#2BD9B0'/><stop offset='1' stop-color='#45F381'/></linearGradient></defs><circle cx='50' cy='50' r='48' fill='url(#cmg)'/><circle cx='50' cy='50' r='19' fill='#0e1316'/></svg>"; }
