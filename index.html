@@ -350,7 +350,9 @@
   .ab-chev{color:var(--neon);font-size:.8rem;margin-right:3px;transition:transform .2s;display:inline-block;flex:0 0 auto}
   .card:not(.ab-min) .ab-chev{transform:rotate(90deg)}
   /* ===== HUB (tela inicial de ferramentas, cara Ensina Banco) ===== */
-  #hub,#construcao{display:none}
+  #hub{display:none}
+  #construcao{display:none;position:fixed;inset:0;z-index:35;flex-direction:column;background:var(--bg)}
+  #construcao .tabbar{position:relative;flex:0 0 auto}
   /* topo neon estilo Ensina Banco */
   .hub-head{position:relative;overflow:hidden;text-align:center;padding:30px 20px 26px;
     background:radial-gradient(120% 120% at 50% -10%, rgba(37,226,124,.16), rgba(23,207,228,.06) 45%, rgba(14,19,22,0) 72%);
@@ -488,7 +490,7 @@
   .tabbar button.active::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:0 0 5px 5px;background:var(--neon);box-shadow:0 0 9px rgba(37,226,124,.8)}
 
   /* em construcao */
-  .cons-box{max-width:520px;margin:0 auto;padding:54px 24px 130px;text-align:center}
+  .cons-box{flex:1 1 auto;overflow:auto;-webkit-overflow-scrolling:touch;max-width:520px;width:100%;margin:0 auto;padding:40px 24px 130px;text-align:center;box-sizing:border-box}
   .cons-ico{width:76px;height:76px;margin:0 auto 18px;border-radius:22px;display:flex;align-items:center;justify-content:center;
     font-size:2.3rem;background:var(--tint);border:1px solid var(--tint-line);color:var(--primary)}
   .cons-box h2{font-family:var(--font-head);font-size:1.4rem;color:#fff;margin:0 0 10px}
@@ -1064,7 +1066,7 @@ var META_TOPICOS=[{sigla:'DECOLA',banco:'Itaú',on:true},{sigla:'GERA',banco:'It
 function openConstrucao(x){hideAll();renderTabs(x.id);try{var _ct=document.getElementById('consTtl');if(_ct)_ct.textContent=x.nome;var _cb=document.getElementById('consBack');if(_cb)_cb.onclick=showHub;}catch(e){}const b=document.getElementById('consBox');
   if(x.id==='meta'){ var _mt=META_TOPICOS.map(function(t){ var on=!!t.on; return "<div class='meta-top"+(on?" on' data-meta='"+esc(t.sigla)+"'":"'")+"><span class='mt-nm'>"+esc(t.sigla)+" <small>"+esc(t.banco)+"</small></span><span class='"+(on?"mt-go":"mt-soon")+"'>"+(on?"Abrir \u203a":"Em breve")+"</span></div>"; }).join(''); b.innerHTML='<div class="cons-ico">'+x.ico+'</div><span class="cons-tag">Planejamento de metas</span><h2>'+esc(x.nome)+'</h2><p>Escolha a modalidade. As outras vão entrando aqui conforme ficam prontas:</p><div class="meta-topics">'+_mt+'</div>'; try{ b.querySelectorAll('.meta-top.on').forEach(function(_el){ _el.onclick=function(){ openDecola(function(){ var _m=MODULES.find(function(z){return z.id==='meta';}); if(_m) openConstrucao(_m); }); }; }); }catch(e){} } else { b.innerHTML='<div class="cons-ico">'+x.ico+'</div><span class="cons-tag">Em construção</span><h2>'+esc(x.nome)+'</h2><p>'+esc(x.desc)+'. Essa ferramenta vai entrar aqui dentro em breve, com a mesma identidade da Ensina Banco.</p>'; }
   const bt=document.createElement('button');bt.className='btn-copy';bt.style.maxWidth='260px';bt.style.margin='0 auto';bt.textContent='Voltar para o início';bt.onclick=showHub;b.appendChild(bt);
-  document.getElementById('construcao').style.display='block';window.scrollTo(0,0);}
+  document.getElementById('construcao').style.display='flex';window.scrollTo(0,0);}
 
 /* ----- cards de mensagem ----- */
 function scriptCard(id,raw,idx,total,ico,tag,regras){
@@ -3858,10 +3860,10 @@ var qrcode = function() {
   +".eb-banner{max-width:none;width:100%;margin:0;border:0;border-radius:0;overflow:hidden;display:block;}"
   +".eb-banner img{width:100%;display:block;}"
   +"#eb-home-extras .eb-recado{margin:16px auto 16px;width:calc(100% - 28px);box-sizing:border-box}"
-  +".eb-recado{max-width:620px;margin:0 auto 16px;background:linear-gradient(135deg,#11201a,#13261d);border:1px solid #1f5a3f;border-radius:16px;padding:16px 18px;}"
-  +".eb-recado .rc-tt{color:#25E27C;font:700 12px/1 Sora,Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}"
-  +".eb-recado .rc-tx{color:#eaf4f0;font:400 13px/1.5 Inter,sans-serif;white-space:pre-wrap;word-break:break-word;}"
-  +".eb-recado .rc-au{color:#9fb1ad;font:600 13px/1 Inter,sans-serif;margin-top:10px;text-align:right;}"
+  +".eb-recado{max-width:620px;margin:0 auto 16px;background:linear-gradient(135deg,#11201a,#13261d);border:1px solid #1f5a3f;border-radius:14px;padding:12px 15px;}"
+  +".eb-recado .rc-tt{color:#25E27C;font:700 11px/1 Sora,Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}"
+  +".eb-recado .rc-tx{color:#eaf4f0;font:400 12.5px/1.45 Inter,sans-serif;white-space:pre-wrap;word-break:break-word;}"
+  +".eb-recado .rc-au{color:#9fb1ad;font:600 12px/1 Inter,sans-serif;margin-top:7px;text-align:right;}"
   +".eb-vcity{position:relative;max-width:620px;margin:0 auto 16px;background:linear-gradient(135deg,#0f2128,#12302a);border:1px solid #2bd9b0;border-radius:16px;padding:15px 16px 15px 16px;box-shadow:0 10px 26px rgba(43,217,176,.18);animation:vcityin .35s ease both;}"
   +"#eb-home-extras .eb-vcity{width:calc(100% - 28px);box-sizing:border-box;}"
   +".eb-vcity .vc-top{display:flex;align-items:center;gap:9px;margin-bottom:7px;padding-right:22px;}"
