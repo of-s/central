@@ -3828,6 +3828,17 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
   +".eb-sec-title{color:#fff;font:700 15px/1 Sora,Inter,sans-serif;margin:0 0 12px;}"
   +".rep-grp{color:#7fe9bd;font:800 11px/1 Sora,Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:18px 0 2px;padding-top:12px;border-top:1px solid #1e2a2f}"
   +".rep-grp:first-child{margin-top:4px;padding-top:0;border-top:0}"
+  +".eb-acao-row{width:100%;display:flex;align-items:center;gap:11px;background:#0f1619;border:1px solid #223;border-radius:12px;padding:12px 13px;margin-bottom:8px;cursor:pointer;text-align:left;color:#dfeee9;font:600 14px/1.2 Inter,sans-serif;transition:border-color .15s}"
+  +".eb-acao-row:hover{border-color:#2bd9b0}"
+  +".eb-acao-row .ac-ic{font-size:18px;flex:0 0 auto;width:26px;text-align:center}"
+  +".eb-acao-row .ac-nm{flex:1 1 auto;min-width:0}"
+  +".eb-acao-row .ac-n{flex:0 0 auto;min-width:28px;height:26px;padding:0 9px;box-sizing:border-box;border-radius:999px;background:#1b2429;color:#8fa1ac;font:800 13px/26px Sora,Inter,sans-serif;text-align:center}"
+  +".eb-acao-row.on{border-color:rgba(245,197,66,.55);background:linear-gradient(90deg,rgba(245,197,66,.1),transparent)}"
+  +".eb-acao-row.on .ac-n{background:linear-gradient(90deg,#f5c542,#ffd36b);color:#3a2a00}"
+  +".eb-acao-row:not(.on){opacity:.5}"
+  +".eb-acao-zero{background:#0f1f17;border:1px solid #1f5a3f;border-radius:12px;padding:14px;color:#9fe7c4;font:600 13.5px/1.5 Inter,sans-serif;text-align:center}"
+  +".eb-flash{animation:ebflash 1.4s ease}"
+  +"@keyframes ebflash{0%,100%{box-shadow:0 0 0 0 rgba(37,226,124,0)}30%{box-shadow:0 0 0 3px rgba(37,226,124,.65)}}"
   +".eb-box .eb-sec-title{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}"
   +".eb-arrow{font-size:13px;color:#8fa1ac;transition:transform .2s;flex:0 0 auto}"
   +".eb-box.collapsed .eb-arrow{transform:rotate(-90deg)}"
@@ -4018,6 +4029,7 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
   +"<div id='eb-admin' class='eb-ov'><div style='padding:calc(env(safe-area-inset-top,0px) + 26px) 16px 60px;max-width:680px;margin:0 auto;width:100%;box-sizing:border-box'>"
     +"<div class='eb-top'><button class='eb-back' id='eb-adm-back'>&#8592; Voltar</button><h2>Administrador</h2></div>"
     +"<div id='eb-adm-stats' class='eb-adm-stats'></div>"
+    +"<div class='eb-box' id='eb-acao-box' style='max-width:560px;margin:0 auto 14px'><div class='eb-sec-title'>&#9203; Precisa da sua a&ccedil;&atilde;o<span id='eb-acao-tot' class='eb-alu-badge' style='display:none'></span></div><div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Tudo que depende de voc&ecirc; num lugar s&oacute;. Toque pra abrir e resolver.</div><div id='eb-acao-list'></div></div>"
     +"<div class='eb-box' id='eb-alu-box' style='max-width:560px;margin:0 auto 14px'>"+"<div class='eb-sec-title'>&#128101; Alunos"+"<span id='eb-alu-badge' class='eb-alu-badge' style='display:none'></span>"+"</div>"+"<div style='color:#8fa1ac;font:400 12.5px/1.5 Inter,sans-serif;margin:-4px 0 10px'>Aceite os novos alunos e veja quem j&aacute; est&aacute; ativo.</div>"+"<div id='eb-adm-count' class='eb-adm-count'></div>"+"<div class='eb-tabs'><button data-tab='pend' class='on'>Pendentes</button><button data-tab='aprov'>Aprovados</button></div>"+"<input id='eb-alu-search' placeholder='Buscar aluno por nome ou e-mail' autocomplete='off' style='width:100%;box-sizing:border-box;background:#0f1619;border:1px solid #2a363a;border-radius:10px;color:#eaf4f0;font:400 14px/1 Inter,sans-serif;padding:11px 12px;margin:0 0 12px'>"+"<div id='eb-adm-list'></div>"+"</div>"
     +"<div class='eb-box' style='max-width:560px;margin:0 auto 14px'>"
       +"<div class='eb-sec-title'>&#127968; Página inicial</div>"
@@ -4125,8 +4137,23 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
 
   /* ---------- ADMIN ---------- */
   function openAdmin(){ if(!CURRENT && !MODO_CONSTRUCAO){ qs('eb-menu').classList.remove('on'); showGate('login'); return; } qs('eb-menu').classList.remove('on'); qs('eb-admin').classList.add('on'); var rc=qs('eb-cfg-recado'); if(rc) rc.value=HOMECFG.recado||''; var au=qs('eb-cfg-autor'); if(au) au.value=HOMECFG.recado_autor||''; var su=qs('eb-cfg-suporte'); if(su) su.value=HOMECFG.suporte||''; updateBannerBtns(); var _isadm=isAdm(); var _rb=qs('eb-rep-box'); if(_rb)_rb.style.display=_isadm?'block':'none'; var _fb=qs('eb-fb-box'); if(_fb)_fb.style.display=_isadm?'block':'none'; if(_isadm){try{loadFeedbacksAdmin();}catch(e){}} var _mb=qs('eb-mlh-box'); if(_mb)_mb.style.display=_isadm?'block':'none'; if(_isadm){try{loadMelhoriasAdmin();}catch(e){}} var _nu=qs('eb-nu-box'); if(_nu)_nu.style.display=_isadm?'block':'none'; var _sg=qs('eb-sug-box'); if(_sg)_sg.style.display=_isadm?'block':'none'; if(_isadm){try{loadSugestoes();}catch(e){}} var _rs=qs('eb-rs-box'); if(_rs)_rs.style.display=_isadm?'block':'none'; if(_isadm){try{loadRedefs();}catch(e){}} var _as=qs('eb-alu-search'); if(_as){_as.value=''; _as.oninput=renderAlunosFiltered;} ebCollapseInit(); clearMsg('eb-cfg-msg'); try{ loadAcessos(); }catch(e){} loadAdmin(); }
+  function acaoGo(id){ var el=document.getElementById(id); if(!el)return; try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ try{el.scrollIntoView();}catch(_){} } el.classList.add('eb-flash'); setTimeout(function(){ el.classList.remove('eb-flash'); },1500); }
+  function loadAcaoResumo(){
+    var list=document.getElementById('eb-acao-list'); if(!list)return;
+    try{ if(!(sb&&CURRENT&&isAdm())){ list.innerHTML=''; var _b=document.getElementById('eb-acao-box'); if(_b)_b.style.display='none'; return; } }catch(e){ return; }
+    var items=[ {ico:'👤',nome:'Alunos para aprovar',tbl:'profiles',target:'eb-alu-box'}, {ico:'🔑',nome:'Redefinições de senha',tbl:'redefinicoes',target:'eb-rs-box'}, {ico:'💡',nome:'Sugestões de abordagem',tbl:'sugestoes',target:'eb-sug-box'}, {ico:'💬',nome:'Feedbacks novos',tbl:'feedbacks',target:'eb-fb-box'}, {ico:'🛠️',nome:'Melhorias enviadas',tbl:'melhorias',target:'eb-mlh-box'} ];
+    function cnt(tbl){ return sb.from(tbl).select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r){ return (r&&typeof r.count==='number')?r.count:0; }, function(){ return 0; }); }
+    Promise.all(items.map(function(it){ return cnt(it.tbl); })).then(function(res){
+      var tot=0; res.forEach(function(n){ tot+=(n||0); });
+      if(tot===0){ list.innerHTML="<div class='eb-acao-zero'>🎉 Tudo em dia! Nada esperando por voc&ecirc; agora.</div>"; }
+      else { list.innerHTML=items.map(function(it,i){ var n=res[i]||0; return "<button type='button' class='eb-acao-row"+(n>0?' on':'')+"' data-go='"+it.target+"'><span class='ac-ic'>"+it.ico+"</span><span class='ac-nm'>"+it.nome+"</span><span class='ac-n'>"+n+"</span></button>"; }).join(''); }
+      var tb=document.getElementById('eb-acao-tot'); if(tb){ if(tot>0){ tb.textContent='⚠️ '+tot; tb.style.display='inline-flex'; } else tb.style.display='none'; }
+      list.querySelectorAll('[data-go]').forEach(function(b){ b.onclick=function(){ acaoGo(b.getAttribute('data-go')); }; });
+    }, function(){ list.innerHTML=''; });
+  }
   function loadAdmin(){
     updateCount();
+    try{ loadAcaoResumo(); }catch(e){}
     var box=qs('eb-adm-list');
     if(!CURRENT){ box.innerHTML='<div class="eb-empty">Modo construção: a seção <b>Página inicial</b> acima já funciona pra testar o banner e o recado. Entre como admin pra ver e aprovar cadastros e sugestões.</div>'; return; }
     box.innerHTML='<div class="eb-empty">Carregando...</div>';
