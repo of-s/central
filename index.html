@@ -3742,7 +3742,7 @@ function isAdm(){ return isAdmReal() && !window.__verAluno; }
 function verAlunoBar(){ var b=document.getElementById('eb-veraluno-bar');
   if(window.__verAluno && isAdmReal()){ if(!b){ b=document.createElement('div'); b.id='eb-veraluno-bar'; b.innerHTML="<span>👁️ Vendo como aluno</span><button type='button' id='eb-veraluno-sair'>Voltar ao admin</button>"; document.body.appendChild(b); b.querySelector('#eb-veraluno-sair').onclick=function(){ setVerAluno(false); }; } b.style.display='flex'; document.documentElement.classList.add('eb-ver-aluno'); }
   else { if(b)b.style.display='none'; document.documentElement.classList.remove('eb-ver-aluno'); } }
-function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setItem('eb_ver_aluno','1'); else sessionStorage.removeItem('eb_ver_aluno'); }catch(e){}
+function setVerAluno(on){ window.__verAluno=!!on;
   try{ document.getElementById('eb-account').classList.remove('on'); }catch(e){}
   try{ document.getElementById('eb-menu').classList.remove('on'); }catch(e){}
   try{ var am=document.getElementById('eb-m-admin'); if(am) am.style.display=isAdm()?'flex':'none'; }catch(e){}
@@ -4088,7 +4088,7 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
     });
   }
   function enterHub(){
-    try{ if(sessionStorage.getItem('eb_ver_aluno')==='1') window.__verAluno=true; }catch(e){}
+    window.__verAluno=false;
     qs('eb-gate').classList.remove('on'); qs('eb-account').classList.remove('on'); qs('eb-admin').classList.remove('on');
     var isAdmin = isAdm();
     var nome = (PROFILE&&PROFILE.nome) || (CURRENT&&CURRENT.user_metadata&&CURRENT.user_metadata.nome) || (isAdmin?'Administrador':'') || (CURRENT?CURRENT.email:'');
@@ -4136,7 +4136,7 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
   }
 
   /* ---------- ADMIN ---------- */
-  function openAdmin(){ if(!CURRENT && !MODO_CONSTRUCAO){ qs('eb-menu').classList.remove('on'); showGate('login'); return; } qs('eb-menu').classList.remove('on'); qs('eb-admin').classList.add('on'); var rc=qs('eb-cfg-recado'); if(rc) rc.value=HOMECFG.recado||''; var au=qs('eb-cfg-autor'); if(au) au.value=HOMECFG.recado_autor||''; var su=qs('eb-cfg-suporte'); if(su) su.value=HOMECFG.suporte||''; updateBannerBtns(); var _isadm=isAdm(); var _rb=qs('eb-rep-box'); if(_rb)_rb.style.display=_isadm?'block':'none'; var _fb=qs('eb-fb-box'); if(_fb)_fb.style.display=_isadm?'block':'none'; if(_isadm){try{loadFeedbacksAdmin();}catch(e){}} var _mb=qs('eb-mlh-box'); if(_mb)_mb.style.display=_isadm?'block':'none'; if(_isadm){try{loadMelhoriasAdmin();}catch(e){}} var _nu=qs('eb-nu-box'); if(_nu)_nu.style.display=_isadm?'block':'none'; var _sg=qs('eb-sug-box'); if(_sg)_sg.style.display=_isadm?'block':'none'; if(_isadm){try{loadSugestoes();}catch(e){}} var _rs=qs('eb-rs-box'); if(_rs)_rs.style.display=_isadm?'block':'none'; if(_isadm){try{loadRedefs();}catch(e){}} var _as=qs('eb-alu-search'); if(_as){_as.value=''; _as.oninput=renderAlunosFiltered;} ebCollapseInit(); clearMsg('eb-cfg-msg'); try{ loadAcessos(); }catch(e){} loadAdmin(); }
+  function openAdmin(){ if(window.__verAluno){ window.__verAluno=false; try{verAlunoBar();}catch(e){} } if(!CURRENT && !MODO_CONSTRUCAO){ qs('eb-menu').classList.remove('on'); showGate('login'); return; } qs('eb-menu').classList.remove('on'); qs('eb-admin').classList.add('on'); var rc=qs('eb-cfg-recado'); if(rc) rc.value=HOMECFG.recado||''; var au=qs('eb-cfg-autor'); if(au) au.value=HOMECFG.recado_autor||''; var su=qs('eb-cfg-suporte'); if(su) su.value=HOMECFG.suporte||''; updateBannerBtns(); var _isadm=isAdm(); var _rb=qs('eb-rep-box'); if(_rb)_rb.style.display=_isadm?'block':'none'; var _fb=qs('eb-fb-box'); if(_fb)_fb.style.display=_isadm?'block':'none'; if(_isadm){try{loadFeedbacksAdmin();}catch(e){}} var _mb=qs('eb-mlh-box'); if(_mb)_mb.style.display=_isadm?'block':'none'; if(_isadm){try{loadMelhoriasAdmin();}catch(e){}} var _nu=qs('eb-nu-box'); if(_nu)_nu.style.display=_isadm?'block':'none'; var _sg=qs('eb-sug-box'); if(_sg)_sg.style.display=_isadm?'block':'none'; if(_isadm){try{loadSugestoes();}catch(e){}} var _rs=qs('eb-rs-box'); if(_rs)_rs.style.display=_isadm?'block':'none'; if(_isadm){try{loadRedefs();}catch(e){}} var _as=qs('eb-alu-search'); if(_as){_as.value=''; _as.oninput=renderAlunosFiltered;} ebCollapseInit(); clearMsg('eb-cfg-msg'); try{ loadAcessos(); }catch(e){} loadAdmin(); }
   function acaoGo(id){ var el=document.getElementById(id); if(!el)return; try{ el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ try{el.scrollIntoView();}catch(_){} } el.classList.add('eb-flash'); setTimeout(function(){ el.classList.remove('eb-flash'); },1500); }
   function loadAcaoResumo(){
     var list=document.getElementById('eb-acao-list'); if(!list)return;
@@ -4649,10 +4649,10 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
       if(r.error){ repMsg('err','Erro: '+r.error.message); return; }
       var d=r.data||[]; if(!d.length){ repMsg('err','Ainda não há uso registrado. Assim que o pessoal usar as ferramentas, aparece aqui.'); return; }
       var cont={},ultimo={},min=null,max=null;
-      d.forEach(function(x){ var u=x.user_id||'?'; cont[u]=(cont[u]||0)+1; var tt=+new Date(x.criado_em); if(!ultimo[u]||tt>ultimo[u])ultimo[u]=tt; if(!min||tt<min)min=tt; if(!max||tt>max)max=tt; });
-      sb.from('profiles').select('id,nome,email').then(function(pr){
-        var nomes={},emails={}; (pr&&pr.data||[]).forEach(function(p){ nomes[p.id]=p.nome; emails[p.id]=p.email; });
-        Object.keys(cont).forEach(function(uid){ if(ehAdminEmail(emails[uid])) delete cont[uid]; });
+      d.forEach(function(x){ var tt=+new Date(x.criado_em); if(!min||tt<min)min=tt; if(!max||tt>max)max=tt; var u=x.user_id; if(!u) return; cont[u]=(cont[u]||0)+1; if(!ultimo[u]||tt>ultimo[u])ultimo[u]=tt; });
+      sb.from('profiles').select('id,nome,email,status').then(function(pr){
+        var has={},nomes={},emails={},stat={}; (pr&&pr.data||[]).forEach(function(p){ has[p.id]=true; nomes[p.id]=p.nome; emails[p.id]=p.email; stat[p.id]=p.status; });
+        Object.keys(cont).forEach(function(uid){ if(ehAdminEmail(emails[uid]) || !has[uid] || stat[uid]==='reprovado') delete cont[uid]; });
         var arr=Object.keys(cont).map(function(k){return [k,cont[k]];}).sort(function(a,b){return b[1]-a[1];});
         var tot=0; Object.keys(cont).forEach(function(k){ tot+=cont[k]; }); if(!tot)tot=1;
         var rows=arr.map(function(e,i){ var pct=Math.round(e[1]/tot*100); var nome=(e[0]==='?')?'(sem identificação)':(nomes[e[0]]||'(sem nome)'); var em=emails[e[0]]||'-';
@@ -5395,7 +5395,7 @@ function setVerAluno(on){ window.__verAluno=!!on; try{ if(on)sessionStorage.setI
     if(!err&&need('uf')){ var u1=g('eb-pd-uf').toUpperCase(); if(u1.length!==2) err='Informe a UF (2 letras).'; else patch.uf=u1; }
     var trabFinal=(qs('eb-pd-trabalha_banco')?qs('eb-pd-trabalha_banco').value:((PROFILE&&PROFILE.trabalha_banco)||''));
     if(!err&&need('trabalha_banco')){ if(!trabFinal) err='Diga se você já trabalha em banco.'; else { patch.trabalha_banco=trabFinal; patch.banco_confirmado=true; } }
-    if(!err){ var simFinal=trabFinal==='sim'; if(simFinal){ var bc=g('eb-pd-banco'); if(!bc) err='Diga em qual banco você trabalha.'; else patch.banco=bc; } }
+    if(!err && (need('banco') || (need('trabalha_banco') && trabFinal==='sim'))){ var bc=g('eb-pd-banco'); if(!bc) err='Diga em qual banco você trabalha.'; else { patch.banco=bc; patch.banco_confirmado=true; } }
     if(err){ setMsg('eb-pd-msg','err',err); return; }
     var b=qs('eb-pd-save'); if(b)b.disabled=true;
     sb.from('profiles').update(patch).eq('id',CURRENT.id).then(function(r){ if(b)b.disabled=false; if(r.error){ setMsg('eb-pd-msg','err',traduz(r.error.message)); return; } try{ if(PROFILE){ for(var k in patch) PROFILE[k]=patch[k]; } }catch(e){} var f2=camposFaltando(PROFILE); if(f2.length){ showPendencia(PROFILE,f2); return; } var ov=qs('eb-pendencia'); if(ov)ov.classList.remove('on'); entrarOuConfirmar(); }).catch(function(e){ if(b)b.disabled=false; setMsg('eb-pd-msg','err',traduz(e&&e.message)); });
