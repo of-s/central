@@ -4791,10 +4791,17 @@ function setVerAluno(on){ window.__verAluno=!!on;
   }
   var ADMIN_EMAILS=['ster376@gmail.com','stsilgu@gmail.com','jorge.luizcardoso92@gmail.com','ensinabanco@gmail.com'];
   function ehAdminEmail(em){ return ADMIN_EMAILS.indexOf(((em||'')+'').toLowerCase().trim())>=0; }
-  function relRanking(){ if(!soAdminRep())return; repMsg('','Gerando...');
-    sb.from('uso').select('user_id,criado_em').is('etapa',null).then(function(r){
+  function relRanking(di,df){ if(!soAdminRep())return; repMsg('','Gerando...');
+    var _rkIn="font:600 13px/1 Inter,Arial,sans-serif;color:#13201c;border:1px solid #c7d0cc;border-radius:8px;padding:7px 10px;background:#fff";
+    var _rkLb="font:700 12.5px/1 Inter,Arial,sans-serif;color:#2a3b35";
+    var _rkBar="<div style='display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#f1f5f3;border:1px solid #d7dedb;border-radius:10px;padding:10px 12px;margin:0 0 14px'><label style='"+_rkLb+"'>De:</label><input type='date' id='eb-rk-di' value='"+(di||'')+"' style='"+_rkIn+"'><label style='"+_rkLb+"'>Até:</label><input type='date' id='eb-rk-df' value='"+(df||'')+"' style='"+_rkIn+"'><button id='eb-rk-clr' type='button' style='font:700 12px/1 Inter,Arial,sans-serif;color:#2a3b35;border:1px solid #c7d0cc;border-radius:8px;padding:8px 12px;background:#fff;cursor:pointer'>Limpar</button></div>";
+    function _rkWire(){ try{ var wi=document.getElementById('eb-rk-di'),wf=document.getElementById('eb-rk-df'),wc=document.getElementById('eb-rk-clr'); function go(){ relRanking((wi&&wi.value)||'',(wf&&wf.value)||''); } if(wi)wi.onchange=go; if(wf)wf.onchange=go; if(wc)wc.onclick=function(){ relRanking('',''); }; }catch(e){} }
+    var _q=sb.from('uso').select('user_id,criado_em').is('etapa',null);
+    if(di){ try{ _q=_q.gte('criado_em', new Date(di+'T00:00:00').toISOString()); }catch(e){} }
+    if(df){ try{ var _de=new Date(df+'T00:00:00'); _de.setDate(_de.getDate()+1); _q=_q.lt('criado_em', _de.toISOString()); }catch(e){} }
+    _q.then(function(r){
       if(r.error){ repMsg('err','Erro: '+r.error.message); return; }
-      var d=r.data||[]; if(!d.length){ repMsg('err','Ainda não há uso registrado. Assim que o pessoal usar as ferramentas, aparece aqui.'); return; }
+      var d=r.data||[]; if(!d.length){ repPrint('Ranking de quem mais usa a plataforma', (di||df)?'Nenhum acesso no período selecionado.':'Ainda não há uso registrado.', _rkBar+"<div style='color:#8fa1ac;padding:12px 2px'>"+((di||df)?'Sem acessos nesse intervalo. Ajuste as datas ou toque em Limpar.':'Assim que o pessoal usar as ferramentas, aparece aqui.')+"</div>"); _rkWire(); repMsg('ok','Filtre por data acima.'); return; }
       var cont={},ultimo={},min=null,max=null;
       d.forEach(function(x){ var tt=+new Date(x.criado_em); if(!min||tt<min)min=tt; if(!max||tt>max)max=tt; var u=x.user_id; if(!u) return; cont[u]=(cont[u]||0)+1; if(!ultimo[u]||tt>ultimo[u])ultimo[u]=tt; });
       sb.from('profiles').select('id,nome,email,status').then(function(pr){
@@ -4808,8 +4815,9 @@ function setVerAluno(on){ window.__verAluno=!!on;
           var _ud=new Date(ultimo[e[0]]||0), _z=function(n){return (n<10?'0':'')+n;}; var _ult=ultimo[e[0]]?(_z(_ud.getDate())+'/'+_z(_ud.getMonth()+1)+'/'+_ud.getFullYear()+' '+_z(_ud.getHours())+'h'+_z(_ud.getMinutes())):'-';
           return [medal+String(i+1), esc(nome), esc(em), String(e[1])+' ('+pct+'%)'+bar, _ult]; });
         var per=(min&&max)?(' Período: '+fmtData(min)+' a '+fmtData(max)+'.'):'';
-        repPrint('Ranking de quem mais usa a plataforma', 'Total de '+tot+' acessos de '+arr.length+' pessoa(s).'+per, repTabela(['#','Nome','E-mail','Acessos','Último uso'], rows));
-        repMsg('ok','Relatório pronto. Na impressão, escolha "Salvar como PDF".');
+        repPrint('Ranking de quem mais usa a plataforma', 'Total de '+tot+' acessos de '+arr.length+' pessoa(s).'+per, _rkBar+repTabela(['#','Nome','E-mail','Acessos','Último uso'], rows));
+        _rkWire();
+        repMsg('ok','Relatório pronto. Filtre por data acima. Na impressão, escolha "Salvar como PDF".');
       }, function(){ repMsg('err','Não consegui ler os cadastros agora.'); });
     });
   }
