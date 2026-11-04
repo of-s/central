@@ -3836,6 +3836,7 @@ var qrcode = function() {
   var SUPABASE_URL="https://zuaqalqxjtrmbtxudlvb.supabase.co";
   var SUPABASE_KEY="sb_publishable_7BmCDUwtBNFZEXykEITi9Q_HdeG4rsd";
   var ADMIN_EMAILS=["ster376@gmail.com","stsilgu@gmail.com","jorge.luizcardoso92@gmail.com","ensinabanco@gmail.com"]; function isAdminEmail(e){ return !!e && ADMIN_EMAILS.indexOf(String(e).toLowerCase())>=0; } var ADMIN_EMAIL=ADMIN_EMAILS[0];
+  var LINK_RENOVACAO=""; /* opcional: cole aqui o link de checkout/renovacao da Greenn. Vazio = esconde o botao "Renovar". */
   var MODO_CONSTRUCAO=false; /* true = abre direto no HUB (demonstracao, pra ajustes). false = exige login (modo real). */
   var RESET_EMAIL='';
   var sb=null, CURRENT=null, PROFILE=null, admTab="pend";
@@ -4103,6 +4104,14 @@ function setVerAluno(on){ window.__verAluno=!!on;
     +"<p class='eb-sub'>O seu acesso não está liberado no momento. Em caso de dúvida, fale com a administração do Ensina Banco.</p>"
     +"<button class='eb-btn ghost' id='eb-btn-rep-out'>Sair</button>"
   +"</div>"
+  // BLOQUEADO (assinatura inativa)
+  +"<div class='eb-screen' data-s='bloqueado' style='display:none'>"
+    +"<div class='eb-kick'>Central do Gerente</div><h1 class='eb-h'>ASSINATURA INATIVA</h1>"
+    +"<div class='eb-ico'>&#128275;</div>"
+    +"<p class='eb-sub'>A sua assinatura está inativa no momento. Renove para voltar a acessar a Central do Gerente.</p>"
+    +"<a id='eb-btn-renovar' class='eb-btn' style='display:none;text-decoration:none;text-align:center' target='_blank' rel='noopener'>Renovar assinatura</a>"
+    +"<button class='eb-btn ghost' id='eb-btn-bloq-out'>Sair</button>"
+  +"</div>"
   +"</div></div></div>"
   // PROFILE CIRCLE + MENU
   +"<div id='eb-prof'><div class='av' id='eb-av' role='button' tabindex='0' aria-label='Minha conta'>?</div></div>"
@@ -4237,20 +4246,36 @@ function setVerAluno(on){ window.__verAluno=!!on;
       }).catch(function(){ PROFILE={nome:'Administrador',status:'aprovado'}; enterHub(); });
       return;
     }
-    sb.from('profiles').select('nome,status,criado_em,foto,role,cpf,nascimento,telefone,cep,endereco,numero,complemento,bairro,cidade,uf,trabalha_banco,banco,senha_temp,senha_temp_em,banco_confirmado').eq('id',user.id).single().then(function(r){
+    sb.from('profiles').select('nome,status,criado_em,foto,role,cpf,nascimento,telefone,cep,endereco,numero,complemento,bairro,cidade,uf,trabalha_banco,banco,senha_temp,senha_temp_em,banco_confirmado,plano,assinatura_status,acesso_ate').eq('id',user.id).single().then(function(r){
       if(r.error||!r.data){ showGate('reproved'); return; }
       PROFILE=r.data;
-      if(r.data.status==='aprovado'){ if(!r.data.cpf||!String(r.data.cpf).trim()){ showCompletar(r.data); } else { var _falta=camposFaltando(r.data); if(_falta.length){ showPendencia(r.data,_falta); } else { entrarOuConfirmar(); } } try{ checkPendencias(); }catch(e){} }
+      if(r.data.status==='aprovado'){ if(r.data.acesso_ate && (new Date(r.data.acesso_ate).getTime() < Date.now())){ showGate('bloqueado'); try{ebWireRenovar();}catch(e){} return; } if(!r.data.cpf||!String(r.data.cpf).trim()){ showCompletar(r.data); } else { var _falta=camposFaltando(r.data); if(_falta.length){ showPendencia(r.data,_falta); } else { entrarOuConfirmar(); } } try{ checkPendencias(); }catch(e){} }
       else if(r.data.status==='reprovado'){ showGate('reproved'); }
+      else if(r.data.status==='bloqueado'){ showGate('bloqueado'); try{ebWireRenovar();}catch(e){} }
       else { showGate('pending'); }
     });
   }
 
+  function ebWireRenovar(){ try{ var a=document.getElementById('eb-btn-renovar'); if(!a)return; if(typeof LINK_RENOVACAO==='string'&&LINK_RENOVACAO){ a.setAttribute('href',LINK_RENOVACAO); a.style.display='block'; } else { a.style.display='none'; } }catch(e){} }
+  function ebGateInicial(){
+    try{
+      var p=new URLSearchParams(location.search||'');
+      var em=(p.get('email')||'').trim();
+      var cv=(p.get('convite')||p.get('acesso')||'');
+      if(em||cv){
+        showGate('signup');
+        try{ var sub=document.querySelector("#eb-gate [data-s='signup'] .eb-sub"); if(sub) sub.textContent='Compra confirmada! Crie a sua senha para acessar.'; }catch(e){}
+        if(em){ try{ var ie=document.getElementById('eb-s-email'); if(ie){ ie.value=em; ie.setAttribute('readonly','readonly'); ie.style.opacity='0.85'; } }catch(e){} }
+        return;
+      }
+    }catch(e){}
+    showGate('login');
+  }
   function checkSession(){
     sb.auth.getSession().then(function(r){
       var s=r && r.data && r.data.session;
-      if(s && s.user){ route(s.user); } else { showGate('login'); }
-    }).catch(function(){ showGate('login'); });
+      if(s && s.user){ route(s.user); } else { ebGateInicial(); }
+    }).catch(function(){ ebGateInicial(); });
   }
 
   /* ---------- ADMIN ---------- */
@@ -5443,6 +5468,7 @@ function setVerAluno(on){ window.__verAluno=!!on;
       var meta={nome:nome,cpf:cpf,nascimento:dataISO(nasc),telefone:tel,cep:cep,endereco:end,numero:num,complemento:comp,bairro:bairro,cidade:cidade,uf:uf,trabalha_banco:trab,banco:(trab==='sim'?banco:''),banco_confirmado:true};
       function _create(){ sb.auth.signUp({email:email,password:p1,options:{data:meta}}).then(function(r){ b.disabled=false;
         if(r.error){ setMsg('eb-signup-msg','err',traduz(r.error.message)); return; }
+        var _u=r.data&&r.data.user; if(_u){ try{ route(_u); return; }catch(e){} }
         showGate('pending');
       }).catch(function(e){ b.disabled=false; setMsg('eb-signup-msg','err',traduz(e&&e.message)); }); }
       function doSignup(){ sb.rpc('liberar_email',{p_email:email}).then(function(rl){ if(rl && !rl.error && rl.data==='ativo'){ b.disabled=false; setMsg('eb-signup-msg','err','Este e-mail já tem cadastro ativo. Tente entrar.'); return; } _create(); }).catch(function(){ _create(); }); }
@@ -5515,6 +5541,7 @@ function setVerAluno(on){ window.__verAluno=!!on;
     };
     qs('eb-btn-pend-out').onclick=doLogout;
     qs('eb-btn-rep-out').onclick=doLogout;
+    try{ qs('eb-btn-bloq-out').onclick=doLogout; }catch(e){}
     // profile menu
     qs('eb-av').onclick=function(ev){ ev.stopPropagation(); qs('eb-menu').classList.toggle('on'); };
     try{ checkPendencias(); if(!window._pendTimer){ window._pendTimer=setInterval(function(){ try{checkPendencias();}catch(e){} },45000); } }catch(e){}
