@@ -3837,7 +3837,7 @@ var qrcode = function() {
   var SUPABASE_KEY="sb_publishable_7BmCDUwtBNFZEXykEITi9Q_HdeG4rsd";
   var ADMIN_EMAILS=["ster376@gmail.com","stsilgu@gmail.com","jorge.luizcardoso92@gmail.com","ensinabanco@gmail.com"]; function isAdminEmail(e){ return !!e && ADMIN_EMAILS.indexOf(String(e).toLowerCase())>=0; } var ADMIN_EMAIL=ADMIN_EMAILS[0];
   var LINK_RENOVACAO=""; /* opcional: cole aqui o link de checkout/renovacao da Greenn. Vazio = esconde o botao "Renovar". */
-  var MODO_CONSTRUCAO=true; /* true = abre direto no HUB (demonstracao, pra ajustes). false = exige login (modo real). */
+  var MODO_CONSTRUCAO=false; /* true = abre direto no HUB (demonstracao, pra ajustes). false = exige login (modo real). */
   var RESET_EMAIL='';
   var sb=null, CURRENT=null, PROFILE=null, admTab="pend";
   function isAdmReal(){ return !!(CURRENT && (isAdminEmail(CURRENT.email) || (PROFILE && PROFILE.role==='admin'))); }
