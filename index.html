@@ -6021,7 +6021,9 @@ function setVerAluno(on){ window.__verAluno=!!on;
     var pw=(qs('nu-pass').value||'').trim();
     var nm=(qs('nu-nome').value||'').trim();
     var m=qs('nu-msg'); function msg(t,x){ if(m){m.className='eb-msg '+t;m.style.display='block';m.textContent=x;} }
-    if(!em||em.indexOf('@')<1){ msg('err','Informe um e-mail válido.'); return; }
+    /* se preencheram trocado (nome no campo e-mail e e-mail no campo nome), corrige sozinho */
+    if(em.indexOf('@')<1 && nm.indexOf('@')>0){ var _sw=em; em=nm.toLowerCase(); nm=_sw; }
+    if(!em||em.indexOf('@')<1){ msg('err','Informe um e-mail válido no primeiro campo (ex.: pessoa@email.com). O nome vai no segundo campo.'); return; }
     if(pw.length<6){ msg('err','A senha precisa de ao menos 6 caracteres.'); return; }
     if(!window.supabase){ msg('err','Não consegui conectar agora.'); return; }
     var b=qs('nu-create'); if(b)b.disabled=true;
